@@ -6,6 +6,13 @@ const session = require('express-session');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
+app.set('view engine', 'ejs');
+app.set('views', './views');
+
+// webhookルートはexpress.json()より先に登録（raw bodyが必要なため）
+const webhookRouter = require('./routes/webhook');
+app.use('/webhook', webhookRouter);
+
 // ミドルウェア
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -17,14 +24,8 @@ app.use(session({
   cookie: { maxAge: 24 * 60 * 60 * 1000 }, // 1日
 }));
 
-app.set('view engine', 'ejs');
-app.set('views', './views');
-
-// ルート
-const webhookRouter = require('./routes/webhook');
+// 管理画面ルート
 const adminRouter = require('./routes/admin');
-
-app.use('/webhook', webhookRouter);
 app.use('/admin', adminRouter);
 
 // トップページ → 管理画面へリダイレクト
