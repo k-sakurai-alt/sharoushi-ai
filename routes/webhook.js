@@ -12,16 +12,18 @@ function getLineConfig() {
   };
 }
 
-router.post('/', (req, res) => {
+router.post('/', express.raw({ type: 'application/json' }), (req, res) => {
   const config = getLineConfig();
   const signature = req.headers['x-line-signature'];
+  const body = req.body.toString('utf8');
 
-  if (!line.validateSignature(JSON.stringify(req.body), config.channelSecret, signature)) {
+  if (!line.validateSignature(body, config.channelSecret, signature)) {
     return res.status(403).send('Invalid signature');
   }
 
+  const parsedBody = JSON.parse(body);
   const client = new line.Client(config);
-  const events = req.body.events || [];
+  const events = parsedBody.events || [];
 
   Promise.all(events.map(event => handleEvent(event, client)))
     .then(() => res.json({ status: 'ok' }))
