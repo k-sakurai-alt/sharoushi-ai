@@ -1,0 +1,22 @@
+{
+  "name": "sharoushi-ai",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@line/bot-sdk": "^7.6.2",
+    "axios": "^1.13.6",
+    "dotenv": "^17.3.1",
+    "ejs": "^5.0.1",
+    "express": "^4.18.2",
+    "express-session": "^1.19.0",
+    "node-fetch": "^2.7.0",
+    "sqlite3": "^6.0.1"
+  }
+}
