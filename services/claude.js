@@ -10,7 +10,7 @@ async function generateResponse(userId, userMessage) {
   ]);
 
   // FAQをシステムプロンプトに追加
-  let fullSystemPrompt = `${systemPrompt}\n\n事務所名: ${officeName}`;
+  let fullSystemPrompt = `${systemPrompt}\n\n事務所名: ${officeName}\n\n【重要】回答はプレーンテキストで記述してください。マークダウン記法（*、**、#、##、- などの記号）は使わないでください。`;
   if (faqs.length > 0) {
     fullSystemPrompt += '\n\n【よくある質問と回答】\n';
     faqs.forEach(faq => {
