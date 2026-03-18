@@ -28,8 +28,8 @@ app.use(session({
 const adminRouter = require('./routes/admin');
 app.use('/admin', adminRouter);
 
-// トップページ → 管理画面へリダイレクト
-app.get('/', (req, res) => res.redirect('/admin'));
+// トップページ → ランディングページ
+app.get('/', (req, res) => res.sendFile('index.html', { root: './public' }));
 
 app.listen(PORT, () => {
   console.log(`サーバー起動: http://localhost:${PORT}`);

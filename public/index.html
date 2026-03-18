@@ -1,0 +1,520 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>シャロAI｜社労士事務所向け LINE AI 相談アシスタント</title>
+  <meta name="description" content="シャロAIは社会保険労務士事務所向けのLINE AIアシスタントです。お客様からの問い合わせに24時間自動対応。事務所の業務効率化と顧客満足度向上を同時に実現します。">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --navy: #1a3a5c;
+      --blue: #2e86c1;
+      --light-blue: #d6eaf8;
+      --accent: #f39c12;
+      --text: #2c3e50;
+      --text-light: #7f8c8d;
+      --white: #ffffff;
+      --bg: #f8fafc;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Hiragino Sans', 'Yu Gothic', sans-serif;
+      color: var(--text);
+      background: var(--white);
+    }
+
+    /* ナビ */
+    nav {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+      background: rgba(26,58,92,0.96);
+      backdrop-filter: blur(8px);
+      padding: 16px 40px;
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .nav-logo { color: white; font-size: 1.4rem; font-weight: 800; letter-spacing: 0.05em; }
+    .nav-logo span { color: #f39c12; }
+    .nav-cta {
+      background: var(--accent); color: white;
+      padding: 10px 28px; border-radius: 50px;
+      text-decoration: none; font-weight: 700; font-size: 0.9rem;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+    .nav-cta:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(243,156,18,0.4); }
+
+    /* ヒーロー */
+    .hero {
+      min-height: 100vh;
+      background: linear-gradient(135deg, #0d2137 0%, #1a3a5c 50%, #0d4a7a 100%);
+      display: flex; align-items: center; justify-content: center;
+      text-align: center; padding: 120px 20px 80px;
+      position: relative; overflow: hidden;
+    }
+    .hero::before {
+      content: '';
+      position: absolute; inset: 0;
+      background: radial-gradient(circle at 20% 50%, rgba(46,134,193,0.15) 0%, transparent 60%),
+                  radial-gradient(circle at 80% 50%, rgba(46,134,193,0.10) 0%, transparent 60%);
+    }
+    .hero-badge {
+      display: inline-block;
+      background: rgba(243,156,18,0.15);
+      border: 1px solid rgba(243,156,18,0.4);
+      color: #f5b942; padding: 8px 20px; border-radius: 50px;
+      font-size: 0.85rem; font-weight: 600; margin-bottom: 28px;
+    }
+    .hero h1 {
+      font-size: clamp(2rem, 5vw, 3.8rem);
+      font-weight: 900; color: white; line-height: 1.2;
+      margin-bottom: 24px; letter-spacing: -0.02em;
+    }
+    .hero h1 span { color: #f39c12; }
+    .hero p {
+      font-size: clamp(1rem, 2vw, 1.25rem);
+      color: rgba(255,255,255,0.75); max-width: 600px;
+      margin: 0 auto 48px; line-height: 1.8;
+    }
+    .hero-btns { display: flex; gap: 16px; justify-content: center; flex-wrap: wrap; }
+    .btn-primary {
+      background: var(--accent); color: white;
+      padding: 18px 44px; border-radius: 50px;
+      text-decoration: none; font-weight: 800; font-size: 1.1rem;
+      transition: all 0.3s; box-shadow: 0 8px 30px rgba(243,156,18,0.35);
+    }
+    .btn-primary:hover { transform: translateY(-3px); box-shadow: 0 12px 40px rgba(243,156,18,0.5); }
+    .btn-outline {
+      border: 2px solid rgba(255,255,255,0.4); color: white;
+      padding: 18px 44px; border-radius: 50px;
+      text-decoration: none; font-weight: 700; font-size: 1.1rem;
+      transition: all 0.3s;
+    }
+    .btn-outline:hover { background: rgba(255,255,255,0.1); border-color: white; }
+    .hero-stats {
+      display: flex; gap: 48px; justify-content: center; flex-wrap: wrap;
+      margin-top: 64px; padding-top: 48px;
+      border-top: 1px solid rgba(255,255,255,0.1);
+    }
+    .stat { text-align: center; }
+    .stat-num { font-size: 2.5rem; font-weight: 900; color: #f39c12; }
+    .stat-label { font-size: 0.85rem; color: rgba(255,255,255,0.6); margin-top: 4px; }
+
+    /* セクション共通 */
+    section { padding: 100px 20px; }
+    .container { max-width: 1100px; margin: 0 auto; }
+    .section-label {
+      display: inline-block;
+      background: var(--light-blue); color: var(--blue);
+      padding: 6px 16px; border-radius: 50px;
+      font-size: 0.8rem; font-weight: 700; margin-bottom: 16px;
+    }
+    .section-title {
+      font-size: clamp(1.6rem, 3vw, 2.4rem);
+      font-weight: 900; margin-bottom: 16px; line-height: 1.3;
+    }
+    .section-sub { color: var(--text-light); font-size: 1.05rem; line-height: 1.8; }
+
+    /* 課題 */
+    .problems { background: var(--bg); }
+    .problems-grid {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 24px; margin-top: 56px;
+    }
+    .problem-card {
+      background: white; border-radius: 16px; padding: 32px;
+      border-left: 4px solid #e74c3c;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.06);
+    }
+    .problem-icon { font-size: 2rem; margin-bottom: 16px; }
+    .problem-card h3 { font-size: 1.05rem; font-weight: 700; margin-bottom: 10px; color: var(--text); }
+    .problem-card p { font-size: 0.9rem; color: var(--text-light); line-height: 1.7; }
+
+    /* 解決 */
+    .solution-intro {
+      text-align: center; margin: 48px 0 64px;
+      font-size: 1.5rem; font-weight: 800; color: var(--navy);
+    }
+    .solution-intro span { color: var(--blue); }
+
+    /* 特徴 */
+    .features-grid {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 32px; margin-top: 56px;
+    }
+    .feature-card {
+      background: white; border-radius: 20px; padding: 40px 32px;
+      box-shadow: 0 8px 40px rgba(0,0,0,0.08);
+      transition: transform 0.3s, box-shadow 0.3s;
+      border-top: 4px solid var(--blue);
+    }
+    .feature-card:hover { transform: translateY(-6px); box-shadow: 0 16px 60px rgba(0,0,0,0.12); }
+    .feature-emoji { font-size: 2.8rem; margin-bottom: 20px; }
+    .feature-card h3 { font-size: 1.2rem; font-weight: 800; margin-bottom: 12px; }
+    .feature-card p { color: var(--text-light); line-height: 1.8; font-size: 0.95rem; }
+
+    /* 使い方 */
+    .howto { background: var(--navy); }
+    .howto .section-title { color: white; }
+    .howto .section-sub { color: rgba(255,255,255,0.6); }
+    .howto .section-label { background: rgba(255,255,255,0.1); color: rgba(255,255,255,0.8); }
+    .steps { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 32px; margin-top: 56px; }
+    .step { text-align: center; position: relative; }
+    .step-num {
+      width: 64px; height: 64px; border-radius: 50%;
+      background: var(--accent); color: white;
+      font-size: 1.6rem; font-weight: 900;
+      display: flex; align-items: center; justify-content: center;
+      margin: 0 auto 20px;
+    }
+    .step h3 { color: white; font-size: 1.1rem; font-weight: 700; margin-bottom: 10px; }
+    .step p { color: rgba(255,255,255,0.6); font-size: 0.9rem; line-height: 1.7; }
+    .step-arrow {
+      position: absolute; top: 30px; right: -20px;
+      color: rgba(255,255,255,0.2); font-size: 1.5rem;
+    }
+
+    /* 料金 */
+    .pricing { background: var(--bg); }
+    .pricing-grid {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 28px; margin-top: 56px; align-items: start;
+    }
+    .plan {
+      background: white; border-radius: 20px; padding: 40px 32px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.07); position: relative;
+    }
+    .plan.popular {
+      border: 2px solid var(--blue);
+      transform: scale(1.04);
+      box-shadow: 0 12px 50px rgba(46,134,193,0.2);
+    }
+    .plan-badge {
+      position: absolute; top: -14px; left: 50%; transform: translateX(-50%);
+      background: var(--blue); color: white;
+      padding: 6px 20px; border-radius: 50px; font-size: 0.8rem; font-weight: 700;
+      white-space: nowrap;
+    }
+    .plan-name { font-size: 0.9rem; font-weight: 700; color: var(--text-light); margin-bottom: 8px; }
+    .plan-price { font-size: 3rem; font-weight: 900; color: var(--navy); }
+    .plan-price span { font-size: 1rem; font-weight: 400; color: var(--text-light); }
+    .plan-desc { color: var(--text-light); font-size: 0.9rem; margin: 16px 0 28px; line-height: 1.6; }
+    .plan-features { list-style: none; }
+    .plan-features li { padding: 10px 0; border-bottom: 1px solid #f0f0f0; font-size: 0.9rem; }
+    .plan-features li::before { content: '✓ '; color: var(--blue); font-weight: 700; }
+    .plan-features li.no::before { content: '✕ '; color: #ddd; }
+    .plan-features li.no { color: #ccc; }
+    .plan-cta {
+      display: block; text-align: center; margin-top: 32px;
+      background: var(--navy); color: white;
+      padding: 14px; border-radius: 10px;
+      text-decoration: none; font-weight: 700; transition: all 0.3s;
+    }
+    .plan.popular .plan-cta { background: var(--blue); }
+    .plan-cta:hover { opacity: 0.85; transform: translateY(-2px); }
+
+    /* CTA */
+    .cta-section {
+      background: linear-gradient(135deg, var(--navy), #0d4a7a);
+      text-align: center; padding: 100px 20px;
+    }
+    .cta-section h2 { font-size: clamp(1.8rem, 3vw, 2.8rem); color: white; font-weight: 900; margin-bottom: 16px; }
+    .cta-section p { color: rgba(255,255,255,0.7); margin-bottom: 40px; font-size: 1.05rem; }
+
+    /* 問い合わせ */
+    .contact { background: var(--bg); }
+    .contact-form {
+      max-width: 640px; margin: 56px auto 0;
+      background: white; border-radius: 20px; padding: 48px;
+      box-shadow: 0 8px 40px rgba(0,0,0,0.08);
+    }
+    .form-group { margin-bottom: 24px; }
+    .form-group label { display: block; font-weight: 700; margin-bottom: 8px; font-size: 0.9rem; }
+    .form-group input, .form-group textarea, .form-group select {
+      width: 100%; padding: 14px 18px;
+      border: 2px solid #e8ecef; border-radius: 10px;
+      font-size: 1rem; font-family: inherit;
+      transition: border-color 0.2s;
+      outline: none;
+    }
+    .form-group input:focus, .form-group textarea:focus, .form-group select:focus {
+      border-color: var(--blue);
+    }
+    .form-group textarea { height: 140px; resize: vertical; }
+    .form-submit {
+      width: 100%; padding: 18px;
+      background: var(--blue); color: white; border: none;
+      border-radius: 10px; font-size: 1.1rem; font-weight: 800;
+      cursor: pointer; transition: all 0.3s;
+    }
+    .form-submit:hover { background: var(--navy); transform: translateY(-2px); }
+
+    /* フッター */
+    footer {
+      background: var(--navy); color: rgba(255,255,255,0.5);
+      text-align: center; padding: 32px 20px; font-size: 0.85rem;
+    }
+    footer strong { color: white; }
+
+    @media (max-width: 768px) {
+      nav { padding: 14px 20px; }
+      .hero-stats { gap: 32px; }
+      .step-arrow { display: none; }
+      .contact-form { padding: 32px 24px; }
+      .plan.popular { transform: none; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ナビ -->
+<nav>
+  <div class="nav-logo">シャロ<span>AI</span></div>
+  <a href="#contact" class="nav-cta">無料相談する</a>
+</nav>
+
+<!-- ヒーロー -->
+<section class="hero">
+  <div style="position:relative; z-index:1;">
+    <div class="hero-badge">🤖 AI × LINE × 社会保険労務士</div>
+    <h1>顧客対応を、<span>AIに任せよう。</span><br>社労士事務所の<br>新しい受付係。</h1>
+    <p>シャロAIは、社会保険労務士事務所向けの<br>LINE AIアシスタントです。<br>お客様からの問い合わせに24時間自動対応し、<br>先生の業務負担を大幅に削減します。</p>
+    <div class="hero-btns">
+      <a href="#contact" class="btn-primary">🚀 無料で試してみる</a>
+      <a href="#features" class="btn-outline">詳しく見る</a>
+    </div>
+    <div class="hero-stats">
+      <div class="stat"><div class="stat-num">24h</div><div class="stat-label">365日対応</div></div>
+      <div class="stat"><div class="stat-num">3分</div><div class="stat-label">導入セットアップ</div></div>
+      <div class="stat"><div class="stat-num">80%</div><div class="stat-label">問い合わせ自動対応率</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- 課題 -->
+<section class="problems">
+  <div class="container">
+    <div style="text-align:center;">
+      <div class="section-label">こんなお悩みはありませんか？</div>
+      <h2 class="section-title">社労士事務所が抱える<br>よくある課題</h2>
+    </div>
+    <div class="problems-grid">
+      <div class="problem-card">
+        <div class="problem-icon">📞</div>
+        <h3>同じ質問への繰り返し対応</h3>
+        <p>「有給は何日ですか？」「社会保険の加入条件は？」など、同じ質問が毎日届いて業務が圧迫される。</p>
+      </div>
+      <div class="problem-card">
+        <div class="problem-icon">🌙</div>
+        <h3>営業時間外の問い合わせ</h3>
+        <p>夜間・休日の問い合わせに対応できず、顧客満足度が上がらない。翌日の折り返しでは遅いケースも。</p>
+      </div>
+      <div class="problem-card">
+        <div class="problem-icon">👥</div>
+        <h3>人手不足・採用難</h3>
+        <p>スタッフを増やしたいが採用が難しい。少人数で多くの顧客に対応しなければならない。</p>
+      </div>
+      <div class="problem-card">
+        <div class="problem-icon">📉</div>
+        <h3>他事務所との差別化ができない</h3>
+        <p>価格競争に巻き込まれている。顧客に選ばれる独自のサービスや価値が提供できていない。</p>
+      </div>
+    </div>
+
+    <div class="solution-intro">
+      これらをまとめて解決するのが<br><span>シャロAI</span>です。
+    </div>
+  </div>
+</section>
+
+<!-- 特徴 -->
+<section id="features">
+  <div class="container">
+    <div style="text-align:center;">
+      <div class="section-label">シャロAIの特徴</div>
+      <h2 class="section-title">なぜシャロAIが選ばれるのか</h2>
+      <p class="section-sub">社会保険労務士の業務に特化した、使いやすいAIアシスタントです。</p>
+    </div>
+    <div class="features-grid">
+      <div class="feature-card">
+        <div class="feature-emoji">💬</div>
+        <h3>LINEで完結。アプリ不要</h3>
+        <p>お客様が普段使っているLINEでそのままご利用いただけます。新しいアプリのインストールや会員登録は一切不要です。</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-emoji">🧠</div>
+        <h3>社労士業務に特化したAI</h3>
+        <p>労務管理・社会保険・雇用保険・給与計算など、社労士業務に関する質問に的確に回答。複雑な案件は自動的に「先生にご相談ください」と案内します。</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-emoji">⚙️</div>
+        <h3>事務所に合わせてカスタマイズ</h3>
+        <p>事務所名・ウェルカムメッセージ・よくある質問（FAQ）など、管理画面から簡単に設定できます。専門知識は不要です。</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-emoji">📊</div>
+        <h3>会話ログで顧客理解が深まる</h3>
+        <p>お客様からの質問内容をすべて記録。よく聞かれる質問のトレンドを把握して、サービス改善に役立てられます。</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-emoji">🔒</div>
+        <h3>安心・安全な情報管理</h3>
+        <p>お客様の会話データは事務所ごとに完全分離して管理。他の事務所のデータが見えることはありません。</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-emoji">🚀</div>
+        <h3>最短即日で導入完了</h3>
+        <p>技術的な設定はすべてこちらで対応。先生はLINE公式アカウントを準備していただくだけで、すぐにサービスを開始できます。</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 使い方 -->
+<section class="howto">
+  <div class="container">
+    <div style="text-align:center;">
+      <div class="section-label">導入の流れ</div>
+      <h2 class="section-title">たった3ステップで導入完了</h2>
+      <p class="section-sub">難しい設定はすべてお任せください。</p>
+    </div>
+    <div class="steps">
+      <div class="step">
+        <div class="step-num">1</div>
+        <h3>お問い合わせ</h3>
+        <p>フォームまたはメールでご連絡ください。無料でデモをご覧いただけます。</p>
+        <div class="step-arrow">→</div>
+      </div>
+      <div class="step">
+        <div class="step-num">2</div>
+        <h3>設定・カスタマイズ</h3>
+        <p>事務所情報・よくある質問を設定します。技術的な作業はすべてこちらで行います。</p>
+        <div class="step-arrow">→</div>
+      </div>
+      <div class="step">
+        <div class="step-num">3</div>
+        <h3>サービス開始</h3>
+        <p>LINE公式アカウントにシャロAIが連携されます。最短即日でお客様対応がスタートします。</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 料金 -->
+<section class="pricing" id="pricing">
+  <div class="container">
+    <div style="text-align:center;">
+      <div class="section-label">料金プラン</div>
+      <h2 class="section-title">シンプルな月額料金</h2>
+      <p class="section-sub">初期費用0円。いつでも解約できます。</p>
+    </div>
+    <div class="pricing-grid">
+      <div class="plan">
+        <div class="plan-name">ライトプラン</div>
+        <div class="plan-price">¥5,000<span>/月</span></div>
+        <div class="plan-desc">まず試してみたい事務所向け。基本的なAI対応機能を提供します。</div>
+        <ul class="plan-features">
+          <li>LINEでのAI自動対応</li>
+          <li>5カテゴリのメニュー</li>
+          <li>管理画面（基本設定）</li>
+          <li>会話ログ閲覧</li>
+          <li class="no">FAQ登録（上限5件）</li>
+          <li class="no">カスタムサポート</li>
+        </ul>
+        <a href="#contact" class="plan-cta">このプランで始める</a>
+      </div>
+      <div class="plan popular">
+        <div class="plan-badge">🔥 最も人気</div>
+        <div class="plan-name">スタンダードプラン</div>
+        <div class="plan-price">¥10,000<span>/月</span></div>
+        <div class="plan-desc">多くの事務所に選ばれているプランです。充実したカスタマイズが可能です。</div>
+        <ul class="plan-features">
+          <li>LINEでのAI自動対応</li>
+          <li>5カテゴリのメニュー</li>
+          <li>管理画面（全機能）</li>
+          <li>会話ログ閲覧</li>
+          <li>FAQ登録（無制限）</li>
+          <li class="no">カスタムサポート</li>
+        </ul>
+        <a href="#contact" class="plan-cta">このプランで始める</a>
+      </div>
+      <div class="plan">
+        <div class="plan-name">プレミアムプラン</div>
+        <div class="plan-price">¥20,000<span>/月</span></div>
+        <div class="plan-desc">手厚いサポートが必要な事務所向け。専任担当がついてサポートします。</div>
+        <ul class="plan-features">
+          <li>LINEでのAI自動対応</li>
+          <li>5カテゴリのメニュー</li>
+          <li>管理画面（全機能）</li>
+          <li>会話ログ閲覧</li>
+          <li>FAQ登録（無制限）</li>
+          <li>専任カスタムサポート</li>
+        </ul>
+        <a href="#contact" class="plan-cta">このプランで始める</a>
+      </div>
+    </div>
+    <p style="text-align:center; margin-top:32px; color:var(--text-light); font-size:0.9rem;">
+      ※ 初月は無料でお試しいただけます。契約期間の縛りはありません。
+    </p>
+  </div>
+</section>
+
+<!-- CTA -->
+<section class="cta-section">
+  <div class="container">
+    <h2>まずは無料デモを<br>体験してみませんか？</h2>
+    <p>実際にLINEでシャロAIを体験していただけます。<br>導入後のイメージが具体的につかめます。</p>
+    <a href="#contact" class="btn-primary">🚀 無料デモを申し込む</a>
+  </div>
+</section>
+
+<!-- お問い合わせ -->
+<section class="contact" id="contact">
+  <div class="container">
+    <div style="text-align:center;">
+      <div class="section-label">お問い合わせ</div>
+      <h2 class="section-title">まずはお気軽にご相談を</h2>
+      <p class="section-sub">無料デモのご依頼・ご質問など、お気軽にどうぞ。<br>通常1営業日以内にご返信いたします。</p>
+    </div>
+    <div class="contact-form">
+      <form action="mailto:info@sharoai.jp" method="post" enctype="text/plain">
+        <div class="form-group">
+          <label>事務所名 <span style="color:#e74c3c;">*</span></label>
+          <input type="text" name="office" placeholder="〇〇社会保険労務士事務所" required>
+        </div>
+        <div class="form-group">
+          <label>お名前 <span style="color:#e74c3c;">*</span></label>
+          <input type="text" name="name" placeholder="山田 太郎" required>
+        </div>
+        <div class="form-group">
+          <label>メールアドレス <span style="color:#e74c3c;">*</span></label>
+          <input type="email" name="email" placeholder="info@example.com" required>
+        </div>
+        <div class="form-group">
+          <label>ご関心のあるプラン</label>
+          <select name="plan">
+            <option>ライトプラン（¥5,000/月）</option>
+            <option selected>スタンダードプラン（¥10,000/月）</option>
+            <option>プレミアムプラン（¥20,000/月）</option>
+            <option>まだ決めていない</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>ご質問・ご要望</label>
+          <textarea name="message" placeholder="無料デモを希望します。など、お気軽にどうぞ。"></textarea>
+        </div>
+        <button type="submit" class="form-submit">送信する →</button>
+      </form>
+    </div>
+  </div>
+</section>
+
+<!-- フッター -->
+<footer>
+  <p><strong>シャロAI</strong> ｜ 社会保険労務士事務所向け LINE AI アシスタント</p>
+  <p style="margin-top:8px;">© 2026 シャロAI All rights reserved.</p>
+</footer>
+
+</body>
+</html>
