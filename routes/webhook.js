@@ -5,18 +5,19 @@ const db = require('../db/database');
 
 const router = express.Router();
 
-// ユーザーごとの選択カテゴリを一時保存
 const userSessions = new Map();
 
 const CATEGORIES = [
   { label: '👔 労務管理', key: '労務管理', color: '#2C5F8A' },
-  { label: '🏥 社会保険', key: '社会保険', color: '#2C5F8A' },
-  { label: '📋 雇用保険', key: '雇用保険', color: '#2C5F8A' },
-  { label: '💴 給与計算', key: '給与計算', color: '#2C5F8A' },
-  { label: '💬 その他相談', key: 'その他', color: '#5A7A9A' },
+  { label: '🏥 社会保険', key: '社会保険', color: '#1A7A5C' },
+  { label: '📋 雇用保険', key: '雇用保険', color: '#5A3A8A' },
+  { label: '💴 給与計算', key: '給与計算', color: '#8A5A1A' },
+  { label: '💬 その他相談', key: 'その他', color: '#4A6A8A' },
 ];
 
-const MENU_TRIGGER_WORDS = ['メニュー', 'menu', 'はじめまして', 'こんにちは', 'ヘルプ', 'help'];
+const CATEGORY_MAP = Object.fromEntries(CATEGORIES.map(c => [c.key, c]));
+
+const MENU_TRIGGER_WORDS = ['メニュー', 'menu', 'はじめまして', 'こんにちは', 'ヘルプ', 'help', '最初に戻る'];
 
 function getLineConfig() {
   return {
@@ -35,58 +36,26 @@ function buildMenuFlex(officeName, welcomeText) {
       header: {
         type: 'box',
         layout: 'vertical',
-        contents: [
-          {
-            type: 'text',
-            text: officeName,
-            color: '#a8c8e8',
-            size: 'sm',
-          },
-          {
-            type: 'text',
-            text: 'AI相談アシスタント',
-            color: '#ffffff',
-            size: 'xl',
-            weight: 'bold',
-            margin: 'xs',
-          },
-        ],
-        backgroundColor: '#1A3A5C',
         paddingAll: '20px',
+        backgroundColor: '#1A3A5C',
+        contents: [
+          { type: 'text', text: officeName, color: '#a8c8e8', size: 'sm' },
+          { type: 'text', text: 'AI相談アシスタント', color: '#ffffff', size: 'xl', weight: 'bold', margin: 'xs' },
+          { type: 'text', text: 'いつでもお気軽にご相談ください', color: '#7aadd4', size: 'xs', margin: 'sm' },
+        ],
       },
       body: {
         type: 'box',
         layout: 'vertical',
-        spacing: 'sm',
         paddingAll: '20px',
+        spacing: 'sm',
         contents: [
-          {
-            type: 'text',
-            text: welcomeText,
-            wrap: true,
-            size: 'sm',
-            color: '#555555',
-          },
-          {
-            type: 'separator',
-            margin: 'lg',
-            color: '#e0e0e0',
-          },
-          {
-            type: 'text',
-            text: 'ご相談内容をお選びください',
-            weight: 'bold',
-            size: 'md',
-            margin: 'lg',
-            color: '#1A3A5C',
-          },
+          { type: 'text', text: welcomeText, wrap: true, size: 'sm', color: '#555555' },
+          { type: 'separator', margin: 'lg', color: '#e0e0e0' },
+          { type: 'text', text: 'ご相談内容をお選びください', weight: 'bold', size: 'md', margin: 'lg', color: '#1A3A5C' },
           ...CATEGORIES.map(cat => ({
             type: 'button',
-            action: {
-              type: 'message',
-              label: cat.label,
-              text: `【${cat.key}】`,
-            },
+            action: { type: 'message', label: cat.label, text: `【${cat.key}】` },
             style: 'primary',
             color: cat.color,
             margin: 'sm',
@@ -97,71 +66,119 @@ function buildMenuFlex(officeName, welcomeText) {
       footer: {
         type: 'box',
         layout: 'vertical',
+        paddingAll: '12px',
         contents: [
-          {
-            type: 'text',
-            text: '※複雑な案件は担当の先生にご確認ください',
-            size: 'xxs',
-            color: '#aaaaaa',
-            align: 'center',
-            wrap: true,
-          },
+          { type: 'text', text: '※具体的な法的判断は担当の先生にご確認ください', size: 'xxs', color: '#aaaaaa', align: 'center', wrap: true },
         ],
-        paddingAll: '10px',
+        backgroundColor: '#f8f8f8',
       },
-      styles: {
-        header: { separator: false },
-        footer: { separator: true },
-      },
+      styles: { footer: { separator: true } },
     },
   };
 }
 
 function buildCategoryFlex(category) {
+  const cat = CATEGORY_MAP[category] || { color: '#2C5F8A' };
   return {
     type: 'flex',
     altText: `${category}についてご質問ください`,
     contents: {
       type: 'bubble',
+      header: {
+        type: 'box',
+        layout: 'vertical',
+        paddingAll: '16px',
+        backgroundColor: cat.color,
+        contents: [
+          { type: 'text', text: CATEGORIES.find(c => c.key === category)?.label || category, color: '#ffffff', weight: 'bold', size: 'lg' },
+        ],
+      },
       body: {
         type: 'box',
         layout: 'vertical',
-        spacing: 'md',
         paddingAll: '20px',
         contents: [
+          { type: 'text', text: 'ご質問をメッセージで入力してください。', wrap: true, size: 'sm', color: '#555555' },
           {
-            type: 'text',
-            text: category,
-            weight: 'bold',
-            size: 'lg',
-            color: '#1A3A5C',
-          },
-          {
-            type: 'text',
-            text: 'についてご質問をどうぞ。\nメッセージを入力してください。',
-            wrap: true,
-            size: 'sm',
-            color: '#555555',
-            margin: 'sm',
+            type: 'box',
+            layout: 'vertical',
+            margin: 'lg',
+            backgroundColor: '#f0f4f8',
+            cornerRadius: '8px',
+            paddingAll: '12px',
+            contents: [
+              { type: 'text', text: '例：「有給休暇は何日取れますか？」', size: 'xs', color: '#888888', wrap: true },
+            ],
           },
         ],
       },
       footer: {
         type: 'box',
         layout: 'vertical',
+        paddingAll: '12px',
+        contents: [
+          { type: 'button', action: { type: 'message', label: '← メニューに戻る', text: 'メニュー' }, style: 'secondary', height: 'sm' },
+        ],
+      },
+      styles: { footer: { separator: true } },
+    },
+  };
+}
+
+function buildResponseFlex(category, aiResponse) {
+  const cat = CATEGORY_MAP[category];
+  const headerColor = cat ? cat.color : '#1A3A5C';
+  const headerLabel = cat ? CATEGORIES.find(c => c.key === category)?.label : '回答';
+
+  return {
+    type: 'flex',
+    altText: aiResponse.substring(0, 50),
+    contents: {
+      type: 'bubble',
+      size: 'mega',
+      header: {
+        type: 'box',
+        layout: 'horizontal',
+        paddingAll: '14px',
+        backgroundColor: headerColor,
+        contents: [
+          { type: 'text', text: headerLabel || '回答', color: '#ffffff', weight: 'bold', size: 'sm', flex: 1 },
+          { type: 'text', text: 'AI回答', color: '#ffffff88', size: 'xs', align: 'end' },
+        ],
+      },
+      body: {
+        type: 'box',
+        layout: 'vertical',
+        paddingAll: '20px',
+        contents: [
+          { type: 'text', text: aiResponse, wrap: true, size: 'sm', color: '#333333', lineSpacing: '6px' },
+        ],
+      },
+      footer: {
+        type: 'box',
+        layout: 'horizontal',
+        paddingAll: '12px',
+        spacing: 'sm',
         contents: [
           {
             type: 'button',
-            action: { type: 'message', label: '← メニューに戻る', text: 'メニュー' },
+            action: { type: 'message', label: '続けて質問', text: `【${category || 'その他'}】` },
+            style: 'primary',
+            color: headerColor,
+            height: 'sm',
+            flex: 1,
+          },
+          {
+            type: 'button',
+            action: { type: 'message', label: 'メニューへ', text: 'メニュー' },
             style: 'secondary',
             height: 'sm',
+            flex: 1,
           },
         ],
-        paddingAll: '10px',
+        backgroundColor: '#f8f8f8',
       },
-      styles: {
-        footer: { separator: true },
-      },
+      styles: { footer: { separator: true } },
     },
   };
 }
@@ -188,17 +205,23 @@ router.post('/', express.raw({ type: 'application/json' }), (req, res) => {
 });
 
 async function handleEvent(event, client) {
+  const [officeName, welcomeMessage] = await Promise.all([
+    db.getSetting('office_name'),
+    db.getSetting('welcome_message'),
+  ]);
+
+  // フォロー時に自動でメニュー表示
+  if (event.type === 'follow') {
+    await client.replyMessage(event.replyToken, buildMenuFlex(officeName, welcomeMessage));
+    return;
+  }
+
   if (event.type !== 'message' || event.message.type !== 'text') return;
 
   const userId = event.source.userId;
   const userMessage = event.message.text.trim();
 
   try {
-    const [officeName, welcomeMessage] = await Promise.all([
-      db.getSetting('office_name'),
-      db.getSetting('welcome_message'),
-    ]);
-
     // メニュー表示
     if (MENU_TRIGGER_WORDS.includes(userMessage)) {
       await client.replyMessage(event.replyToken, buildMenuFlex(officeName, welcomeMessage));
@@ -223,16 +246,7 @@ async function handleEvent(event, client) {
     const aiResponse = await generateResponse(userId, contextMessage);
     await db.saveConversation(userId, userMessage, aiResponse);
 
-    await client.replyMessage(event.replyToken, {
-      type: 'text',
-      text: aiResponse,
-      quickReply: {
-        items: [{
-          type: 'action',
-          action: { type: 'message', label: 'メニューに戻る', text: 'メニュー' },
-        }],
-      },
-    });
+    await client.replyMessage(event.replyToken, buildResponseFlex(selectedCategory, aiResponse));
   } catch (err) {
     console.error('Handle event error:', err);
     await client.replyMessage(event.replyToken, {
