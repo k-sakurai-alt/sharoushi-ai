@@ -878,12 +878,12 @@
       /* ヒーロー：縦1列、テキスト→モックアップ */
       .hero { padding: 84px 24px 56px; min-height: auto; }
       .hero-inner {
-        grid-template-columns: 1fr;
-        gap: 40px;
+        grid-template-columns: 1fr !important;
+        gap: 40px !important;
         align-items: center;
       }
-      .hero-content { order: 0; }
-      .hero-mockup  { order: 1; display: flex; justify-content: center; }
+      .hero-content { order: 0 !important; }
+      .hero-mockup  { order: 1 !important; display: flex !important; justify-content: center; }
       .hero h1 { font-size: 2rem; line-height: 1.3; margin-bottom: 16px; }
       .hero-badge { font-size: 0.78rem; margin-bottom: 18px; }
       .hero-desc { font-size: 0.93rem; margin-bottom: 28px; }
