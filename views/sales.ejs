@@ -102,6 +102,22 @@
   <div class="container">
     <h2>営業支援エージェント</h2>
 
+    <!-- Gmail連携状態 -->
+    <% if (locals.query && locals.query.gmail === 'connected') { %>
+      <div style="background:#e8f8f5;border-radius:10px;padding:12px 18px;margin-bottom:16px;color:#1abc9c;font-weight:700;">
+        ✅ Gmailの連携が完了しました。メールをアプリから直接送信できます。
+      </div>
+    <% } else if (locals.query && locals.query.error === 'auth_failed') { %>
+      <div style="background:#fdedec;border-radius:10px;padding:12px 18px;margin-bottom:16px;color:#e74c3c;font-weight:700;">
+        ❌ Google認証に失敗しました。再度お試しください。
+      </div>
+    <% } %>
+    <div style="margin-bottom:20px;">
+      <a href="/auth/google" style="display:inline-block;background:#4285f4;color:white;padding:9px 20px;border-radius:8px;font-weight:700;font-size:0.88rem;text-decoration:none;">
+        🔗 Gmailと連携する（初回のみ）
+      </a>
+    </div>
+
     <!-- 進捗サマリー -->
     <%
       const total = leads.length;
@@ -304,7 +320,7 @@
       });
     }
 
-    function openGmail(textId, toEmail) {
+    async function openGmail(textId, toEmail) {
       const text = document.getElementById(textId).textContent;
       const lines = text.split('\n');
       let subject = '';
@@ -319,9 +335,40 @@
         }
       }
       const body = bodyLines.join('\n').trim();
-      const params = new URLSearchParams({ view: 'cm', from: 'info@lp.sconnect.co.jp', su: subject, body });
-      if (toEmail) params.set('to', toEmail);
-      window.open('https://mail.google.com/mail/?' + params.toString(), '_blank');
+
+      if (!toEmail) {
+        alert('送信先メールアドレスを入力してください');
+        return;
+      }
+
+      const btn = event.target;
+      btn.textContent = '送信中...';
+      btn.disabled = true;
+
+      try {
+        const res = await fetch('/admin/sales/send-email', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ to: toEmail, subject, body }),
+        });
+        const data = await res.json();
+        if (data.needAuth) {
+          if (confirm('Gmailとまだ連携していません。今すぐ連携しますか？')) {
+            location.href = '/auth/google';
+          }
+        } else if (data.success) {
+          btn.textContent = '✓ 送信完了';
+          btn.style.background = '#27ae60';
+        } else {
+          alert('送信エラー: ' + data.error);
+          btn.textContent = 'Gmailで送る';
+          btn.disabled = false;
+        }
+      } catch(e) {
+        alert('通信エラーが発生しました');
+        btn.textContent = 'Gmailで送る';
+        btn.disabled = false;
+      }
     }
   </script>
 </body>

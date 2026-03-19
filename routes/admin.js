@@ -115,7 +115,7 @@ router.get('/sales/seed', requireAuth, async (req, res) => {
 // 営業支援
 router.get('/sales', requireAuth, async (req, res) => {
   const leads = await db.getOutreach();
-  res.render('sales', { leads });
+  res.render('sales', { leads, query: req.query });
 });
 
 router.post('/sales/generate', requireAuth, async (req, res) => {
