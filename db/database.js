@@ -30,6 +30,18 @@ db.serialize(() => {
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP
   )`);
 
+  // 営業進捗
+  db.run(`CREATE TABLE IF NOT EXISTS outreach (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    office TEXT NOT NULL,
+    contact_name TEXT,
+    email TEXT,
+    status TEXT DEFAULT 'pending',
+    notes TEXT,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+  )`);
+
   // 会話ログ
   db.run(`CREATE TABLE IF NOT EXISTS conversations (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -167,9 +179,46 @@ function getInquiries() {
   });
 }
 
+function addOutreach(office, contactName, email, notes) {
+  return new Promise((resolve, reject) => {
+    db.run(
+      'INSERT INTO outreach (office, contact_name, email, notes) VALUES (?, ?, ?, ?)',
+      [office, contactName, email, notes],
+      function(err) { if (err) reject(err); else resolve(this.lastID); }
+    );
+  });
+}
+
+function getOutreach() {
+  return new Promise((resolve, reject) => {
+    db.all('SELECT * FROM outreach ORDER BY updated_at DESC', [], (err, rows) => {
+      if (err) reject(err); else resolve(rows);
+    });
+  });
+}
+
+function updateOutreachStatus(id, status, notes) {
+  return new Promise((resolve, reject) => {
+    db.run(
+      'UPDATE outreach SET status = ?, notes = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?',
+      [status, notes, id],
+      (err) => { if (err) reject(err); else resolve(); }
+    );
+  });
+}
+
+function deleteOutreach(id) {
+  return new Promise((resolve, reject) => {
+    db.run('DELETE FROM outreach WHERE id = ?', [id], (err) => {
+      if (err) reject(err); else resolve();
+    });
+  });
+}
+
 module.exports = {
   getSetting, setSetting, getAllSettings,
   addFaq, getFaqs, deleteFaq,
   saveConversation, getConversations, getRecentHistory,
   saveInquiry, getInquiries,
+  addOutreach, getOutreach, updateOutreachStatus, deleteOutreach,
 };
