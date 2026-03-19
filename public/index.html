@@ -883,8 +883,14 @@
         gap: 32px;
         text-align: center;
       }
-      .hero-mockup { display: none; }
-      .hero-inner { grid-template-columns: 1fr; }
+      .hero-inner {
+        grid-template-columns: 1fr 140px;
+        gap: 20px;
+        align-items: center;
+      }
+      .hero-mockup { display: flex; }
+      .phone-frame { width: 130px; animation: none; }
+      .phone-screen { height: 240px; }
       .hero h1 { font-size: 1.9rem; line-height: 1.3; }
       .hero-desc { font-size: 0.95rem; margin-bottom: 28px; max-width: 100%; }
       .hero-badge { font-size: 0.78rem; }
@@ -938,10 +944,11 @@
 
     @media (max-width: 480px) {
       .hero { padding: 72px 16px 40px; }
-      .hero h1 { font-size: 1.65rem; }
-      .hero-desc { font-size: 0.9rem; }
-      .phone-frame { width: 180px; }
-      .phone-screen { height: 340px; }
+      .hero h1 { font-size: 1.5rem; }
+      .hero-desc { font-size: 0.88rem; }
+      .hero-inner { grid-template-columns: 1fr 120px; gap: 14px; }
+      .phone-frame { width: 112px; }
+      .phone-screen { height: 210px; }
       .stats-grid { grid-template-columns: 1fr 1fr; }
       .demo-content { padding: 24px 16px; }
       .contact-wrapper { padding: 24px 16px; }
