@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>一括営業メール｜シャロAI</title>
+  <link rel="stylesheet" href="/style.css">
+  <style>
+    .email-card {
+      background: white; border-radius: 16px; padding: 24px;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.06); margin-bottom: 24px;
+      border-left: 4px solid #2e86c1;
+    }
+    .email-header {
+      display: flex; justify-content: space-between; align-items: flex-start;
+      margin-bottom: 16px; flex-wrap: wrap; gap: 10px;
+    }
+    .email-office { font-size: 1rem; font-weight: 800; color: #1a3a5c; }
+    .email-to {
+      font-size: 0.82rem; color: #7f8c8d; margin-top: 4px;
+    }
+    .email-to a { color: #2e86c1; }
+    .email-body {
+      background: #f8fafc; border: 1px solid #dde3ea;
+      border-radius: 10px; padding: 16px; position: relative;
+    }
+    .email-body pre {
+      white-space: pre-wrap; font-size: 0.88rem; line-height: 1.8;
+      color: #2c3e50; font-family: inherit;
+    }
+    .btn-group { display: flex; gap: 8px; flex-wrap: wrap; }
+    .btn-copy {
+      background: #2e86c1; color: white; border: none;
+      border-radius: 6px; padding: 7px 16px; font-size: 0.82rem;
+      cursor: pointer; font-weight: 700;
+    }
+    .btn-copy:hover { background: #1a6fa8; }
+    .btn-form {
+      background: #06c755; color: white; border: none;
+      border-radius: 6px; padding: 7px 16px; font-size: 0.82rem;
+      cursor: pointer; font-weight: 700; text-decoration: none;
+      display: inline-block;
+    }
+    .btn-sent {
+      background: #27ae60; color: white; border: none;
+      border-radius: 6px; padding: 7px 16px; font-size: 0.82rem;
+      cursor: pointer; font-weight: 700;
+    }
+    .badge-type {
+      display: inline-block; padding: 3px 10px; border-radius: 20px;
+      font-size: 0.75rem; font-weight: 700;
+    }
+    .badge-email { background: #eaf4fb; color: #2e86c1; }
+    .badge-form { background: #e8f8f5; color: #1abc9c; }
+    .summary-bar {
+      background: #1a3a5c; color: white; border-radius: 12px;
+      padding: 16px 24px; margin-bottom: 28px;
+      display: flex; gap: 32px; flex-wrap: wrap; align-items: center;
+    }
+    .summary-bar span { font-size: 0.88rem; opacity: 0.85; }
+    .summary-bar strong { font-size: 1.2rem; color: #f39c12; }
+  </style>
+</head>
+<body>
+  <nav class="navbar">
+    <span class="nav-brand">AIアシスタント管理</span>
+    <div class="nav-links">
+      <a href="/admin">設定</a>
+      <a href="/admin/faqs">FAQ管理</a>
+      <a href="/admin/logs">会話ログ</a>
+      <a href="/admin/inquiries">問い合わせ</a>
+      <a href="/admin/sales" style="font-weight:bold;">営業支援</a>
+      <a href="/contract-template" target="_blank">契約書</a>
+      <a href="/onboarding-guide" target="_blank">手順書</a>
+      <a href="/admin/logout" class="btn-logout">ログアウト</a>
+    </div>
+  </nav>
+
+  <div class="container">
+    <div style="display:flex; align-items:center; gap:16px; margin-bottom:20px;">
+      <h2 style="margin:0;">一括営業メール生成結果</h2>
+      <a href="/admin/sales" style="font-size:0.85rem; color:#7f8c8d;">← 営業リストに戻る</a>
+    </div>
+
+    <div class="summary-bar">
+      <div><strong><%= results.length %></strong><span> 件のメールを生成</span></div>
+      <div><strong><%= results.filter(r => r.email).length %></strong><span> 件はメール送信</span></div>
+      <div><strong><%= results.filter(r => !r.email).length %></strong><span> 件はフォーム送信</span></div>
+      <span style="margin-left:auto;font-size:0.82rem;opacity:0.7;">送信後は営業リストでステータスを「送信済」に更新してください</span>
+    </div>
+
+    <% results.forEach((r, i) => { %>
+    <div class="email-card">
+      <div class="email-header">
+        <div>
+          <div class="email-office"><%= i + 1 %>. <%= r.office %></div>
+          <div class="email-to">
+            <% if (r.email) { %>
+              送信先: <a href="mailto:<%= r.email %>"><%= r.email %></a>
+              <span class="badge-type badge-email">メール</span>
+            <% } else { %>
+              <% const formUrl = (r.notes || '').match(/https?:\/\/[^\s]+/)?.[0] || ''; %>
+              送信先: フォーム
+              <% if (formUrl) { %><a href="<%= formUrl %>" target="_blank"><%= formUrl %></a><% } %>
+              <span class="badge-type badge-form">フォーム</span>
+            <% } %>
+          </div>
+        </div>
+        <div class="btn-group">
+          <button class="btn-copy" onclick="copyEmail(<%= i %>)">コピー</button>
+          <% if (r.email) { %>
+            <a href="mailto:<%= r.email %>?subject=&body=" class="btn-form" id="mailto-<%= i %>"
+               onclick="setMailto(<%= i %>)">メールを開く</a>
+          <% } else { %>
+            <% const formUrl2 = (r.notes || '').match(/https?:\/\/[^\s]+/)?.[0] || '#'; %>
+            <a href="<%= formUrl2 %>" target="_blank" class="btn-form">フォームを開く</a>
+          <% } %>
+          <form action="/admin/sales/update" method="POST" style="display:inline;">
+            <input type="hidden" name="id" value="<%= r.id %>">
+            <input type="hidden" name="notes" value="<%= r.notes || '' %>">
+            <input type="hidden" name="status" value="sent">
+            <button type="submit" class="btn-sent">送信済にする</button>
+          </form>
+        </div>
+      </div>
+      <div class="email-body">
+        <pre id="email-text-<%= i %>"><%= r.generatedEmail %></pre>
+      </div>
+    </div>
+    <% }) %>
+  </div>
+
+  <script>
+    const emails = <%- JSON.stringify(results.map(r => r.generatedEmail)) %>;
+
+    function copyEmail(i) {
+      navigator.clipboard.writeText(emails[i]).then(() => {
+        const btn = event.target;
+        btn.textContent = '✓ コピー済';
+        setTimeout(() => btn.textContent = 'コピー', 1500);
+      });
+    }
+
+    function setMailto(i) {
+      const text = encodeURIComponent(emails[i]);
+      const link = document.getElementById('mailto-' + i);
+      const lines = emails[i].split('\n');
+      const subjectLine = lines.find(l => l.startsWith('件名：') || l.startsWith('件名:'));
+      const subject = subjectLine ? encodeURIComponent(subjectLine.replace(/^件名[：:]/, '').trim()) : '';
+      const body = encodeURIComponent(emails[i]);
+      link.href = `mailto:${link.href.split('mailto:')[1].split('?')[0]}?subject=${subject}&body=${body}`;
+    }
+  </script>
+</body>
+</html>
