@@ -836,32 +836,83 @@
       .stats-grid { grid-template-columns: repeat(2, 2fr); }
     }
 
+    /* ハンバーガーメニュー */
+    .hamburger {
+      display: none; flex-direction: column; gap: 5px;
+      cursor: pointer; padding: 8px; background: none; border: none;
+    }
+    .hamburger span {
+      display: block; width: 24px; height: 2px;
+      background: white; border-radius: 2px;
+      transition: all 0.3s;
+    }
+    .hamburger.open span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
+    .hamburger.open span:nth-child(2) { opacity: 0; }
+    .hamburger.open span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
+
+    .mobile-menu {
+      display: none; position: fixed; top: 60px; left: 0; right: 0;
+      background: rgba(26,58,92,0.98); backdrop-filter: blur(12px);
+      padding: 20px 24px 28px; z-index: 999;
+      border-bottom: 1px solid rgba(255,255,255,0.1);
+      flex-direction: column; gap: 4px;
+    }
+    .mobile-menu.open { display: flex; }
+    .mobile-menu a {
+      color: rgba(255,255,255,0.85); text-decoration: none;
+      font-size: 1rem; font-weight: 600; padding: 14px 0;
+      border-bottom: 1px solid rgba(255,255,255,0.08);
+    }
+    .mobile-menu a:last-child {
+      border-bottom: none; margin-top: 8px;
+      background: var(--accent); color: white;
+      text-align: center; padding: 14px; border-radius: 50px;
+      font-weight: 800;
+    }
+
     @media (max-width: 768px) {
       nav { padding: 0 20px; height: 60px; }
       .nav-links { display: none; }
-      .hero { padding: 90px 24px 60px; }
-      .hero-inner { grid-template-columns: 1fr; gap: 48px; }
+      .hamburger { display: flex; }
+      section { padding: 72px 16px; }
+      .hero { padding: 80px 20px 56px; }
+      .hero-inner { grid-template-columns: 1fr; gap: 40px; }
       .hero-mockup { order: -1; }
-      .phone-frame { width: 240px; }
-      .phone-screen { height: 440px; }
-      .hero-stats { gap: 24px; }
-      .steps { grid-template-columns: 1fr; }
+      .phone-frame { width: 220px; }
+      .phone-screen { height: 400px; }
+      .hero-stats { gap: 20px; flex-wrap: wrap; }
+      .stat-num { font-size: 1.8rem; }
+      .steps { grid-template-columns: 1fr; gap: 40px; }
       .steps::before { display: none; }
       .pricing-grid { grid-template-columns: 1fr; }
       .plan.popular { transform: none; }
       .features-grid { grid-template-columns: 1fr; }
       .stats-grid { grid-template-columns: repeat(2, 1fr); }
       .demo-inner { grid-template-columns: 1fr; }
-      .demo-content { padding: 40px 32px; }
-      .contact-wrapper { padding: 36px 24px; }
-      .solution-banner { padding: 28px 28px; }
+      .demo-content { padding: 36px 28px; }
+      .demo-qr-area { padding: 40px 28px; }
+      .contact-wrapper { padding: 32px 20px; }
+      .solution-banner { padding: 28px 24px; flex-direction: column; align-items: flex-start; }
       .footer-inner { flex-direction: column; align-items: flex-start; gap: 12px; }
+      .footer-links { flex-wrap: wrap; gap: 16px; }
+      .cta-trust { gap: 16px; }
+      .hero-btns { flex-direction: column; align-items: flex-start; }
+      .btn-primary, .btn-outline { width: 100%; text-align: center; justify-content: center; }
+      .faq-question { font-size: 0.9rem; }
     }
 
     @media (max-width: 480px) {
-      .hero h1 { font-size: 1.85rem; }
+      .hero h1 { font-size: 1.75rem; }
+      .phone-frame { width: 200px; }
+      .phone-screen { height: 360px; }
       .stats-grid { grid-template-columns: 1fr 1fr; }
-      .demo-content { padding: 32px 24px; }
+      .demo-content { padding: 28px 20px; }
+      .contact-wrapper { padding: 28px 16px; }
+      .plan { padding: 32px 24px; }
+      .hero-badge { font-size: 0.75rem; }
+      .stat-card-num { font-size: 2.4rem; }
+      .section-title { font-size: 1.5rem; }
+      .hero-stats { justify-content: space-between; }
     }
   </style>
 </head>
@@ -881,7 +932,16 @@
     <li><a href="#faq">よくある質問</a></li>
     <li><a href="#contact" class="nav-cta">無料相談する</a></li>
   </ul>
+  <button class="hamburger" id="hamburger" aria-label="メニュー">
+    <span></span><span></span><span></span>
+  </button>
 </nav>
+<div class="mobile-menu" id="mobile-menu">
+  <a href="#features">特徴</a>
+  <a href="#pricing">料金</a>
+  <a href="#faq">よくある質問</a>
+  <a href="#contact">無料相談する</a>
+</div>
 
 
 <!-- =====================
@@ -1460,6 +1520,20 @@
   window.addEventListener('scroll', () => {
     nav.classList.toggle('scrolled', window.scrollY > 50);
   }, { passive: true });
+
+  /* ----- Hamburger menu ----- */
+  const hamburger = document.getElementById('hamburger');
+  const mobileMenu = document.getElementById('mobile-menu');
+  hamburger.addEventListener('click', () => {
+    hamburger.classList.toggle('open');
+    mobileMenu.classList.toggle('open');
+  });
+  mobileMenu.querySelectorAll('a').forEach(a => {
+    a.addEventListener('click', () => {
+      hamburger.classList.remove('open');
+      mobileMenu.classList.remove('open');
+    });
+  });
 
   /* ----- Intersection Observer: reveal on scroll ----- */
   const revealEls = document.querySelectorAll('.reveal, .reveal-left, .reveal-right');
