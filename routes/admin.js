@@ -193,6 +193,51 @@ router.post('/sales/generate', requireAuth, async (req, res) => {
   }
 });
 
+// 営業メール一括生成
+router.get('/sales/generate-all', requireAuth, async (req, res) => {
+  const axios = require('axios');
+  const leads = await db.getOutreach();
+  const pendingLeads = leads.filter(l => l.status === 'pending');
+
+  const generateEmail = async (lead) => {
+    const prompt = `あなたはシャロAIという社労士事務所向けLINE AIアシスタントサービスの営業担当です。
+以下の事務所に向けた、自然で押しつけがましくない営業メールを日本語で作成してください。
+
+事務所名: ${lead.office}
+担当者名: ${lead.contact_name || '先生'}
+所在地: ${lead.notes || ''}
+
+【メールの要件】
+- 件名も含めて出力すること
+- 300〜400文字程度（短く・読みやすく）
+- 「繰り返しの問い合わせ対応」「時間外対応」という痛みに触れる
+- シャロAIの価値（初月無料・設定おまかせ・LINE活用）を自然に伝える
+- 押し売りせず「まず話だけでも」という低ハードルなCTAで締める
+- 署名は「シャロAI 桜井（info@lp.sconnect.co.jp）」とする`;
+
+    try {
+      const response = await axios.post(
+        'https://api.anthropic.com/v1/messages',
+        { model: 'claude-haiku-4-5-20251001', max_tokens: 1024, messages: [{ role: 'user', content: prompt }] },
+        { headers: { 'x-api-key': process.env.ANTHROPIC_API_KEY, 'anthropic-version': '2023-06-01', 'content-type': 'application/json' } }
+      );
+      return { ...lead, generatedEmail: response.data.content[0].text };
+    } catch (e) {
+      return { ...lead, generatedEmail: '生成エラー: ' + e.message };
+    }
+  };
+
+  // 5件ずつバッチ処理（レート制限対策）
+  const results = [];
+  for (let i = 0; i < pendingLeads.length; i += 5) {
+    const batch = pendingLeads.slice(i, i + 5);
+    const batchResults = await Promise.all(batch.map(generateEmail));
+    results.push(...batchResults);
+  }
+
+  res.render('sales-emails', { results });
+});
+
 router.post('/sales/add', requireAuth, async (req, res) => {
   const { office, contact_name, email, notes } = req.body;
   await db.addOutreach(office, contact_name, email, notes);
