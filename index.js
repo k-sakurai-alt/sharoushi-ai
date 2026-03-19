@@ -28,6 +28,10 @@ app.use(session({
 const adminRouter = require('./routes/admin');
 app.use('/admin', adminRouter);
 
+// Gmail OAuth・送信ルート
+const gmailRouter = require('./routes/gmail');
+app.use('/', gmailRouter);
+
 // トップページ → ランディングページ
 app.get('/', (req, res) => res.sendFile('index.html', { root: './public' }));
 app.get('/privacy', (req, res) => res.sendFile('privacy.html', { root: './public' }));
