@@ -76,4 +76,10 @@ router.get('/logs', requireAuth, async (req, res) => {
   res.render('logs', { conversations });
 });
 
+// 問い合わせ一覧
+router.get('/inquiries', requireAuth, async (req, res) => {
+  const inquiries = await db.getInquiries();
+  res.render('inquiries', { inquiries });
+});
+
 module.exports = router;
