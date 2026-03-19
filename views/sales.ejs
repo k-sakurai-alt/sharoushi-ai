@@ -41,6 +41,13 @@
       cursor: pointer; font-weight: 700;
     }
     .btn-copy:hover { background: #1a6fa8; }
+    .btn-gmail {
+      position: absolute; top: 10px; right: 80px;
+      background: #ea4335; color: white; border: none;
+      border-radius: 6px; padding: 5px 12px; font-size: 0.78rem;
+      cursor: pointer; font-weight: 700;
+    }
+    .btn-gmail:hover { background: #c62828; }
     .loading { color: #7f8c8d; font-size: 0.85rem; text-align: center; padding: 12px; }
 
     /* ステータスバッジ */
@@ -126,7 +133,9 @@
           <input type="text" id="ce-pref" placeholder="都道府県（任意）">
         </div>
         <button class="btn-agent" onclick="generate('cold_email','ce')">✨ メールを生成する</button>
+        <input type="email" id="ce-email" placeholder="送信先メールアドレス（任意）" style="margin-top:8px;">
         <div class="result-box" id="ce-result">
+          <button class="btn-gmail" onclick="openGmail('ce-text', document.getElementById('ce-email').value)">Gmailで送る</button>
           <button class="btn-copy" onclick="copyText('ce-text')">コピー</button>
           <pre id="ce-text"></pre>
         </div>
@@ -138,8 +147,10 @@
         <p>返信がない時の自然な追いメールを生成</p>
         <input type="text" id="fu-office" placeholder="事務所名">
         <input type="text" id="fu-name" placeholder="担当者名（任意）">
+        <input type="email" id="fu-email" placeholder="送信先メールアドレス（任意）" style="margin-top:8px;">
         <button class="btn-agent" onclick="generate('followup','fu')">✨ フォローアップを生成</button>
         <div class="result-box" id="fu-result">
+          <button class="btn-gmail" onclick="openGmail('fu-text', document.getElementById('fu-email').value)">Gmailで送る</button>
           <button class="btn-copy" onclick="copyText('fu-text')">コピー</button>
           <pre id="fu-text"></pre>
         </div>
@@ -154,8 +165,10 @@
           <input type="text" id="pr-name" placeholder="担当者名（任意）">
           <input type="text" id="pr-size" placeholder="規模（例：3名）">
         </div>
+        <input type="email" id="pr-email" placeholder="送信先メールアドレス（任意）" style="margin-top:8px;">
         <button class="btn-agent" onclick="generate('proposal','pr')">✨ 提案書を生成する</button>
         <div class="result-box" id="pr-result">
+          <button class="btn-gmail" onclick="openGmail('pr-text', document.getElementById('pr-email').value)">Gmailで送る</button>
           <button class="btn-copy" onclick="copyText('pr-text')">コピー</button>
           <pre id="pr-text"></pre>
         </div>
@@ -204,7 +217,7 @@
                 <td><%= lead.contact_name || '—' %></td>
                 <td>
                   <% if (lead.email) { %>
-                    <a href="mailto:<%= lead.email %>" style="font-size:0.82rem;"><%= lead.email %></a>
+                    <a href="https://mail.google.com/mail/?view=cm&to=<%= encodeURIComponent(lead.email) %>" target="_blank" style="font-size:0.82rem;"><%= lead.email %></a>
                   <% } else { %>—<% } %>
                 </td>
                 <td>
@@ -289,6 +302,26 @@
         btn.textContent = '✓ コピー済';
         setTimeout(() => btn.textContent = 'コピー', 1500);
       });
+    }
+
+    function openGmail(textId, toEmail) {
+      const text = document.getElementById(textId).textContent;
+      const lines = text.split('\n');
+      let subject = '';
+      const bodyLines = [];
+      let subjectFound = false;
+      for (const line of lines) {
+        if (!subjectFound && /^件名[：:]/.test(line)) {
+          subject = line.replace(/^件名[：:]\s*/, '').trim();
+          subjectFound = true;
+        } else if (subjectFound) {
+          bodyLines.push(line);
+        }
+      }
+      const body = bodyLines.join('\n').trim();
+      const params = new URLSearchParams({ view: 'cm', su: subject, body });
+      if (toEmail) params.set('to', toEmail);
+      window.open('https://mail.google.com/mail/?' + params.toString(), '_blank');
     }
   </script>
 </body>
