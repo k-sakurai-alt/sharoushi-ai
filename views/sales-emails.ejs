@@ -46,6 +46,9 @@
       border-radius: 6px; padding: 7px 16px; font-size: 0.82rem;
       cursor: pointer; font-weight: 700;
     }
+    .btn-sent.done {
+      background: #e74c3c;
+    }
     .badge-type {
       display: inline-block; padding: 3px 10px; border-radius: 20px;
       font-size: 0.75rem; font-weight: 700;
@@ -115,7 +118,7 @@
             <% const formUrl2 = (r.notes || '').match(/https?:\/\/[^\s]+/)?.[0] || '#'; %>
             <a href="<%= formUrl2 %>" target="_blank" class="btn-form">フォームを開く</a>
           <% } %>
-          <form action="/admin/sales/update" method="POST" style="display:inline;">
+          <form action="/admin/sales/update" method="POST" style="display:inline;" onsubmit="markSent(this)">
             <input type="hidden" name="id" value="<%= r.id %>">
             <input type="hidden" name="notes" value="<%= r.notes || '' %>">
             <input type="hidden" name="status" value="sent">
@@ -139,6 +142,12 @@
         btn.textContent = '✓ コピー済';
         setTimeout(() => btn.textContent = 'コピー', 1500);
       });
+    }
+
+    function markSent(form) {
+      const btn = form.querySelector('.btn-sent');
+      btn.classList.add('done');
+      btn.textContent = '✓ 送信済';
     }
 
     function openGmail(i, toEmail) {
