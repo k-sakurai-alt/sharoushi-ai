@@ -168,8 +168,6 @@
     .hero {
       min-height: 100vh;
       background: linear-gradient(135deg, #06111e 0%, #0d2137 35%, #1a3a5c 65%, #0d4a7a 100%);
-      background-size: 400% 400%;
-      animation: gradient-shift 12s ease infinite;
       display: flex; align-items: center;
       padding: 100px 40px 80px;
       position: relative; overflow: hidden;
@@ -201,7 +199,7 @@
       position: relative; z-index: 1;
     }
 
-    .hero-content { animation: fadeInLeft 0.9s ease forwards; }
+    .hero-content { opacity: 1; }
 
     .hero-badge {
       display: inline-flex; align-items: center; gap: 8px;
@@ -275,7 +273,6 @@
        LINE CHAT MOCKUP
     ===================== */
     .hero-mockup {
-      animation: fadeInRight 0.9s 0.2s ease both;
       display: flex; justify-content: center; align-items: center;
     }
 
@@ -1473,9 +1470,16 @@
         observer.unobserve(entry.target);
       }
     });
-  }, { threshold: 0.12, rootMargin: '0px 0px -40px 0px' });
+  }, { threshold: 0.05, rootMargin: '0px 0px 0px 0px' });
 
-  revealEls.forEach(el => observer.observe(el));
+  revealEls.forEach(el => {
+    // ヒーロー内の要素は即座に表示
+    if (el.closest('.hero')) {
+      el.classList.add('visible');
+    } else {
+      observer.observe(el);
+    }
+  });
 
   /* ----- Counter animation ----- */
   function animateCounter(el) {
