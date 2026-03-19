@@ -319,7 +319,7 @@
         }
       }
       const body = bodyLines.join('\n').trim();
-      const params = new URLSearchParams({ view: 'cm', su: subject, body });
+      const params = new URLSearchParams({ view: 'cm', from: 'info@lp.sconnect.co.jp', su: subject, body });
       if (toEmail) params.set('to', toEmail);
       window.open('https://mail.google.com/mail/?' + params.toString(), '_blank');
     }
