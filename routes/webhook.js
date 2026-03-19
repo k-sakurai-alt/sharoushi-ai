@@ -136,7 +136,7 @@ function buildCategoryFlex(category) {
         backgroundColor: cat.color,
         contents: [
           { type: 'text', text: label, color: '#ffffff', weight: 'bold', size: 'lg' },
-          { type: 'text', text: 'よく聞かれる質問を選ぶか、自由に入力してください', color: 'rgba(255,255,255,0.75)', size: 'xxs', margin: 'xs', wrap: true },
+          { type: 'text', text: 'よく聞かれる質問を選ぶか、自由に入力してください', color: '#FFFFFFBF', size: 'xxs', margin: 'xs', wrap: true },
         ],
       },
       body: {
