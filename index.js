@@ -31,6 +31,15 @@ app.use('/admin', adminRouter);
 // トップページ → ランディングページ
 app.get('/', (req, res) => res.sendFile('index.html', { root: './public' }));
 
+// お問い合わせ受付
+const db = require('./db/database');
+app.post('/inquiry', async (req, res) => {
+  const { office, name, email, plan, message } = req.body;
+  if (!office || !name || !email) return res.status(400).send('必須項目が不足しています');
+  await db.saveInquiry(office, name, email, plan, message);
+  res.sendFile('thanks.html', { root: './public' });
+});
+
 app.listen(PORT, () => {
   console.log(`サーバー起動: http://localhost:${PORT}`);
   console.log(`管理画面: http://localhost:${PORT}/admin`);

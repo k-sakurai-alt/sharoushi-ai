@@ -19,6 +19,17 @@ db.serialize(() => {
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP
   )`);
 
+  // お問い合わせ
+  db.run(`CREATE TABLE IF NOT EXISTS inquiries (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    office TEXT NOT NULL,
+    name TEXT NOT NULL,
+    email TEXT NOT NULL,
+    plan TEXT,
+    message TEXT,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+  )`);
+
   // 会話ログ
   db.run(`CREATE TABLE IF NOT EXISTS conversations (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -138,8 +149,27 @@ function getRecentHistory(userId, limit = 5) {
   });
 }
 
+function saveInquiry(office, name, email, plan, message) {
+  return new Promise((resolve, reject) => {
+    db.run(
+      'INSERT INTO inquiries (office, name, email, plan, message) VALUES (?, ?, ?, ?, ?)',
+      [office, name, email, plan, message],
+      (err) => { if (err) reject(err); else resolve(); }
+    );
+  });
+}
+
+function getInquiries() {
+  return new Promise((resolve, reject) => {
+    db.all('SELECT * FROM inquiries ORDER BY created_at DESC', [], (err, rows) => {
+      if (err) reject(err); else resolve(rows);
+    });
+  });
+}
+
 module.exports = {
   getSetting, setSetting, getAllSettings,
   addFaq, getFaqs, deleteFaq,
   saveConversation, getConversations, getRecentHistory,
+  saveInquiry, getInquiries,
 };
