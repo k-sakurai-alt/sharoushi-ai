@@ -127,12 +127,15 @@
       const pct = total > 0 ? Math.round(closed / 20 * 100) : 0;
     %>
     <div class="card" style="margin-bottom:24px;">
-      <div style="display:flex; gap:32px; flex-wrap:wrap; margin-bottom:16px;">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px; flex-wrap:wrap; gap:12px;">
+      <div style="display:flex; gap:32px; flex-wrap:wrap;">
         <div><div style="font-size:1.8rem;font-weight:900;color:#1a3a5c;"><%= total %></div><div style="font-size:0.8rem;color:#7f8c8d;">営業先リスト</div></div>
         <div><div style="font-size:1.8rem;font-weight:900;color:#2e86c1;"><%= sent %></div><div style="font-size:0.8rem;color:#7f8c8d;">送信済み</div></div>
         <div><div style="font-size:1.8rem;font-weight:900;color:#8e44ad;"><%= active %></div><div style="font-size:0.8rem;color:#7f8c8d;">アクティブ商談</div></div>
         <div><div style="font-size:1.8rem;font-weight:900;color:#27ae60;"><%= closed %></div><div style="font-size:0.8rem;color:#7f8c8d;">成約済み</div></div>
         <div><div style="font-size:1.8rem;font-weight:900;color:#f39c12;">¥<%= (closed * 10000).toLocaleString() %></div><div style="font-size:0.8rem;color:#7f8c8d;">月額売上（想定）</div></div>
+      </div>
+      <a href="/admin/sales/generate-all" style="display:inline-block;background:#2e86c1;color:white;padding:10px 22px;border-radius:10px;font-weight:700;font-size:0.9rem;text-decoration:none;white-space:nowrap;">✨ 一括メール生成</a>
       </div>
       <div class="progress-label">月20万円達成まで（目標：20社）<%= pct %>%</div>
       <div class="progress-bar"><div class="progress-fill" style="width:<%= pct %>%"></div></div>
