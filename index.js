@@ -32,6 +32,7 @@ app.use('/admin', adminRouter);
 app.get('/', (req, res) => res.sendFile('index.html', { root: './public' }));
 app.get('/privacy', (req, res) => res.sendFile('privacy.html', { root: './public' }));
 app.get('/terms', (req, res) => res.sendFile('terms.html', { root: './public' }));
+app.get('/company', (req, res) => res.sendFile('company.html', { root: './public' }));
 
 // お問い合わせ受付
 const db = require('./db/database');
