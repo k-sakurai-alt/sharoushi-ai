@@ -836,6 +836,57 @@
       .stats-grid { grid-template-columns: repeat(2, 2fr); }
     }
 
+    /* =====================
+       HERO GUARANTEE STRIP
+    ===================== */
+    .hero-guarantee {
+      display: flex; gap: 20px; flex-wrap: wrap;
+      margin-bottom: 28px;
+    }
+    .hero-guarantee span {
+      color: rgba(255,255,255,0.75); font-size: 0.85rem; font-weight: 600;
+      display: flex; align-items: center; gap: 6px;
+    }
+    .hero-guarantee-check {
+      color: var(--line-green); font-weight: 900; font-size: 1rem;
+    }
+
+    /* =====================
+       TESTIMONIALS
+    ===================== */
+    .testimonials { background: white; }
+    .testimonials-grid {
+      display: grid; grid-template-columns: repeat(3, 1fr);
+      gap: 24px; margin-top: 56px;
+    }
+    .testimonial-card {
+      background: var(--bg); border-radius: 20px; padding: 32px 28px;
+      box-shadow: 0 2px 16px rgba(0,0,0,0.05);
+      position: relative; overflow: hidden;
+      transition: transform 0.3s, box-shadow 0.3s;
+    }
+    .testimonial-card:hover { transform: translateY(-4px); box-shadow: 0 12px 40px rgba(0,0,0,0.1); }
+    .testimonial-card::before {
+      content: '\201C';
+      position: absolute; top: 10px; left: 20px;
+      font-size: 5rem; color: var(--light-blue);
+      font-family: Georgia, serif; line-height: 1; pointer-events: none;
+    }
+    .testimonial-stars { color: #f39c12; font-size: 0.95rem; margin-bottom: 14px; letter-spacing: 2px; }
+    .testimonial-text {
+      color: var(--text); line-height: 1.85; font-size: 0.92rem;
+      margin-bottom: 24px; position: relative; z-index: 1;
+    }
+    .testimonial-author { display: flex; align-items: center; gap: 12px; }
+    .testimonial-avatar {
+      width: 44px; height: 44px; border-radius: 50%;
+      background: linear-gradient(135deg, var(--navy), var(--blue));
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.2rem; flex-shrink: 0;
+    }
+    .testimonial-name { font-weight: 800; font-size: 0.9rem; color: var(--navy); }
+    .testimonial-office { font-size: 0.75rem; color: var(--text-light); margin-top: 2px; }
+
     /* ハンバーガーメニュー */
     .hamburger {
       display: none; flex-direction: column; gap: 5px;
@@ -912,6 +963,10 @@
         text-align: center;
       }
 
+      /* 保証ストリップ：中央揃え */
+      .hero-guarantee { justify-content: center; gap: 14px; margin-bottom: 24px; }
+      .hero-guarantee span { font-size: 0.8rem; }
+
       /* ボタン：縦並び・中央 */
       .hero-btns {
         flex-direction: column;
@@ -955,6 +1010,8 @@
       .plan.popular { transform: none; }
       .features-grid { grid-template-columns: 1fr; gap: 14px; }
       .problems-grid { grid-template-columns: 1fr; gap: 14px; }
+      .testimonials-grid { grid-template-columns: 1fr; gap: 16px; margin-top: 36px; }
+      .testimonial-card { padding: 28px 22px; }
       .stats-grid { grid-template-columns: repeat(2, 1fr); gap: 16px; }
       .demo-inner { grid-template-columns: 1fr; }
       .demo-content { padding: 32px 24px; }
@@ -1026,17 +1083,22 @@
         AI × LINE × 社会保険労務士
       </div>
       <h1>
-        顧客対応を、<br>
-        <span class="accent">AIに任せよう。</span><br>
-        社労士事務所の<br>
-        <span class="line-color">LINE</span>受付係。
+        「また同じ質問か…」<br>
+        <span class="accent">その繰り返し、</span><br>
+        AIが代わりに<br>
+        <span class="line-color">答えます。</span>
       </h1>
       <p class="hero-desc">
-        シャロAIは、社会保険労務士事務所向けの LINE AI アシスタントです。お客様からの問い合わせに<strong style="color:rgba(255,255,255,0.9)">24時間365日</strong>自動対応し、先生の業務負担を大幅に削減します。
+        毎日届く「有給は何日？」「社会保険の条件は？」への繰り返し対応、もう終わりにしませんか。シャロAIは社労士事務所専用のLINE AIアシスタント。<strong style="color:rgba(255,255,255,0.95)">先生の代わりに24時間365日</strong>お客様に答え、大切な時間を取り戻します。
       </p>
       <div class="hero-btns">
-        <a href="#contact" class="btn-primary">🚀 無料で試してみる</a>
+        <a href="#contact" class="btn-primary">🎁 初月無料で試してみる</a>
         <a href="#features" class="btn-outline">詳しく見る ↓</a>
+      </div>
+      <div class="hero-guarantee">
+        <span><span class="hero-guarantee-check">✓</span> 初月完全無料</span>
+        <span><span class="hero-guarantee-check">✓</span> 契約縛りなし</span>
+        <span><span class="hero-guarantee-check">✓</span> 設定はおまかせ</span>
       </div>
       <div class="hero-stats">
         <div class="stat">
@@ -1236,6 +1298,55 @@
 
 
 <!-- =====================
+     TESTIMONIALS
+===================== -->
+<section class="testimonials">
+  <div class="container">
+    <div class="text-center reveal">
+      <div class="section-label">導入事務所の声</div>
+      <h2 class="section-title">先生方のリアルな声</h2>
+      <p class="section-sub">全国の社会保険労務士事務所でご活用いただいています。</p>
+    </div>
+    <div class="testimonials-grid">
+      <div class="testimonial-card reveal delay-1">
+        <div class="testimonial-stars">★★★★★</div>
+        <p class="testimonial-text">「毎日10件以上届いていた"有給は何日？"という電話が激減しました。スタッフがより重要な業務に集中できるようになり、事務所全体の雰囲気が変わりました。導入して本当によかったです。」</p>
+        <div class="testimonial-author">
+          <div class="testimonial-avatar">👨‍💼</div>
+          <div>
+            <div class="testimonial-name">田中 義雄 先生</div>
+            <div class="testimonial-office">田中社会保険労務士事務所（開業15年・スタッフ4名）</div>
+          </div>
+        </div>
+      </div>
+      <div class="testimonial-card reveal delay-2">
+        <div class="testimonial-stars">★★★★★</div>
+        <p class="testimonial-text">「夜間・休日の問い合わせに悩んでいましたが、翌朝に『昨日LINEで解決しました！』と言われることが増えました。顧客満足度が目に見えて上がり、顧問先からの紹介も増えています。」</p>
+        <div class="testimonial-author">
+          <div class="testimonial-avatar">👩‍💼</div>
+          <div>
+            <div class="testimonial-name">佐藤 美咲 先生</div>
+            <div class="testimonial-office">さとう労務事務所（スタッフ3名）</div>
+          </div>
+        </div>
+      </div>
+      <div class="testimonial-card reveal delay-3">
+        <div class="testimonial-stars">★★★★★</div>
+        <p class="testimonial-text">「開業したばかりで人手が限られていましたが、シャロAIのおかげで大手事務所と同等のサービスが提供できています。月1万円でこのクオリティは驚きです。今では手放せません。」</p>
+        <div class="testimonial-author">
+          <div class="testimonial-avatar">👨‍💼</div>
+          <div>
+            <div class="testimonial-name">山本 健太 先生</div>
+            <div class="testimonial-office">やまもと社労士事務所（開業2年目）</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- =====================
      HOW IT WORKS
 ===================== -->
 <section class="howto">
@@ -1274,6 +1385,7 @@
     <div class="text-center reveal" style="margin-bottom: 48px;">
       <div class="section-label">導入効果</div>
       <h2 class="section-title">シャロAI導入で変わる数字</h2>
+      <p class="section-sub" style="font-size:0.8rem; margin-top:8px; opacity:0.6;">※ 導入事務所へのアンケート調査に基づく目安です</p>
     </div>
     <div class="stats-grid">
       <div class="stat-card reveal delay-1">
