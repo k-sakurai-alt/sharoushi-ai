@@ -17,6 +17,39 @@ const CATEGORIES = [
 
 const CATEGORY_MAP = Object.fromEntries(CATEGORIES.map(c => [c.key, c]));
 
+const CATEGORY_FAQS = {
+  '労務管理': [
+    '有給休暇は何日取れますか？',
+    '残業代の計算方法を教えてください',
+    '育児休業を取りたいのですが',
+    '就業規則について知りたい',
+  ],
+  '社会保険': [
+    '社会保険の加入条件は？',
+    '扶養に入れる条件を教えてください',
+    '退職後の健康保険はどうすれば？',
+    '傷病手当金の申請方法は？',
+  ],
+  '雇用保険': [
+    '失業給付はいくらもらえますか？',
+    '育児休業給付金の条件は？',
+    '雇用保険の加入条件を教えてください',
+    '離職票はいつもらえますか？',
+  ],
+  '給与計算': [
+    '残業代の正しい計算方法は？',
+    '交通費は社会保険料に含まれますか？',
+    '給与明細の見方を教えてください',
+    '手取り額の計算方法は？',
+  ],
+  'その他': [
+    '顧問契約について教えてください',
+    '助成金について知りたい',
+    '相談費用はいくらですか？',
+    '担当者に直接連絡したい',
+  ],
+};
+
 const MENU_TRIGGER_WORDS = ['メニュー', 'menu', 'はじめまして', 'こんにちは', 'ヘルプ', 'help', '最初に戻る'];
 
 function getLineConfig() {
@@ -79,6 +112,18 @@ function buildMenuFlex(officeName, welcomeText) {
 
 function buildCategoryFlex(category) {
   const cat = CATEGORY_MAP[category] || { color: '#2C5F8A' };
+  const faqs = CATEGORY_FAQS[category] || [];
+  const label = CATEGORIES.find(c => c.key === category)?.label || category;
+
+  const faqButtons = faqs.map(q => ({
+    type: 'button',
+    action: { type: 'message', label: q.length > 20 ? q.substring(0, 19) + '…' : q, text: q },
+    style: 'secondary',
+    height: 'sm',
+    margin: 'sm',
+    color: '#1A3A5C',
+  }));
+
   return {
     type: 'flex',
     altText: `${category}についてご質問ください`,
@@ -90,24 +135,28 @@ function buildCategoryFlex(category) {
         paddingAll: '16px',
         backgroundColor: cat.color,
         contents: [
-          { type: 'text', text: CATEGORIES.find(c => c.key === category)?.label || category, color: '#ffffff', weight: 'bold', size: 'lg' },
+          { type: 'text', text: label, color: '#ffffff', weight: 'bold', size: 'lg' },
+          { type: 'text', text: 'よく聞かれる質問を選ぶか、自由に入力してください', color: 'rgba(255,255,255,0.75)', size: 'xxs', margin: 'xs', wrap: true },
         ],
       },
       body: {
         type: 'box',
         layout: 'vertical',
-        paddingAll: '20px',
+        paddingAll: '16px',
+        spacing: 'none',
         contents: [
-          { type: 'text', text: 'ご質問をメッセージで入力してください。', wrap: true, size: 'sm', color: '#555555' },
+          { type: 'text', text: 'よくある質問', weight: 'bold', size: 'xs', color: '#888888', margin: 'none' },
+          { type: 'separator', margin: 'sm', color: '#e8e8e8' },
+          ...faqButtons,
           {
             type: 'box',
             layout: 'vertical',
             margin: 'lg',
-            backgroundColor: '#f0f4f8',
+            backgroundColor: '#f5f7fa',
             cornerRadius: '8px',
-            paddingAll: '12px',
+            paddingAll: '10px',
             contents: [
-              { type: 'text', text: '例：「有給休暇は何日取れますか？」', size: 'xs', color: '#888888', wrap: true },
+              { type: 'text', text: '💬 上記以外はメッセージで自由にご入力ください', size: 'xxs', color: '#888888', wrap: true },
             ],
           },
         ],
