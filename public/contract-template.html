@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>シャロAI サービス利用契約書</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Hiragino Mincho ProN', 'Yu Mincho', Georgia, serif;
+      color: #1a1a1a; background: #fff; line-height: 2.0;
+      font-size: 13px;
+    }
+    .page {
+      max-width: 760px; margin: 0 auto;
+      padding: 60px 60px 80px;
+    }
+    .no-print {
+      background: #1a3a5c; color: white; text-align: center;
+      padding: 12px; font-family: sans-serif; font-size: 0.88rem;
+    }
+    .no-print button {
+      background: #f39c12; color: white; border: none;
+      padding: 8px 24px; border-radius: 6px; font-size: 0.88rem;
+      font-weight: 700; cursor: pointer; margin-left: 16px;
+    }
+    h1 {
+      text-align: center; font-size: 1.5rem; font-weight: 900;
+      margin-bottom: 8px; letter-spacing: 0.1em;
+    }
+    .subtitle { text-align: center; font-size: 0.85rem; color: #555; margin-bottom: 48px; }
+    .parties {
+      border: 1px solid #ccc; padding: 24px 28px; margin-bottom: 36px;
+      border-radius: 4px;
+    }
+    .parties p { margin-bottom: 8px; }
+    .parties .party-label { font-weight: 700; display: inline-block; width: 40px; }
+    .parties .fill { border-bottom: 1px solid #333; display: inline-block; min-width: 280px; }
+    h2 {
+      font-size: 1rem; font-weight: 700; margin: 32px 0 12px;
+      border-bottom: 2px solid #1a3a5c; padding-bottom: 4px;
+    }
+    p { margin-bottom: 10px; }
+    ol { padding-left: 24px; margin-bottom: 16px; }
+    ol li { margin-bottom: 6px; }
+    .plan-table { width: 100%; border-collapse: collapse; margin: 16px 0; }
+    .plan-table th, .plan-table td {
+      border: 1px solid #ccc; padding: 10px 14px; font-size: 0.9rem;
+    }
+    .plan-table th { background: #f0f4f8; font-weight: 700; text-align: center; }
+    .plan-table td { text-align: center; }
+    .plan-table td:first-child { text-align: left; }
+    .check-row { display: flex; gap: 32px; margin: 12px 0; }
+    .check-item { display: flex; align-items: center; gap: 8px; font-size: 0.92rem; }
+    .check-box { width: 16px; height: 16px; border: 1.5px solid #333; display: inline-block; flex-shrink: 0; }
+    .sign-section {
+      margin-top: 56px; display: grid;
+      grid-template-columns: 1fr 1fr; gap: 40px;
+    }
+    .sign-block { border: 1px solid #ccc; padding: 24px; border-radius: 4px; }
+    .sign-block h3 { font-size: 0.9rem; font-weight: 700; margin-bottom: 16px; color: #1a3a5c; }
+    .sign-line { border-bottom: 1px solid #555; margin-bottom: 6px; height: 32px; }
+    .sign-label { font-size: 0.78rem; color: #777; }
+    .contract-date { text-align: right; margin-bottom: 32px; font-size: 0.9rem; }
+    .contract-date .fill-date { border-bottom: 1px solid #333; display: inline-block; min-width: 180px; }
+    .note { background: #fef9e7; border-left: 3px solid #f39c12; padding: 12px 16px; font-size: 0.85rem; color: #666; margin: 16px 0; }
+    @media print {
+      .no-print { display: none; }
+      .page { padding: 40px; }
+      body { font-size: 12px; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="no-print">
+  印刷またはPDF保存して使用してください
+  <button onclick="window.print()">印刷 / PDF保存</button>
+  <a href="/admin" style="color:rgba(255,255,255,0.7);text-decoration:none;margin-left:16px;font-size:0.82rem;">← 管理画面に戻る</a>
+</div>
+
+<div class="page">
+
+  <h1>シャロAI サービス利用契約書</h1>
+  <p class="subtitle">本契約書は合同会社エスコネクトと利用者の間で締結するサービス利用に関する契約です</p>
+
+  <div class="contract-date">
+    契約締結日：<span class="fill-date"></span>
+  </div>
+
+  <div class="parties">
+    <p><span class="party-label">甲</span>合同会社エスコネクト（サービス提供者）<br>
+    　　大阪府大阪市北区梅田１丁目２番2号 大阪駅前第２ビル 12F-12<br>
+    　　代表者：桜井 謙司</p>
+    <br>
+    <p><span class="party-label">乙</span><span class="fill" style="min-width:320px;">&nbsp;</span>（利用者）<br>
+    　　所在地：<span class="fill" style="min-width:360px;">&nbsp;</span><br>
+    　　代表者・担当者：<span class="fill" style="min-width:260px;">&nbsp;</span></p>
+  </div>
+
+  <p>甲と乙は、シャロAI（以下「本サービス」）の利用に関して以下のとおり契約（以下「本契約」）を締結する。</p>
+
+  <h2>第1条（サービス内容）</h2>
+  <p>甲は乙に対し、以下のサービスを提供する。</p>
+  <ol>
+    <li>LINEメッセージへのAI自動応答システムの提供</li>
+    <li>よくある質問（FAQ）の管理・設定</li>
+    <li>管理画面（会話ログ・設定・問い合わせ管理）の提供</li>
+    <li>初期設定・セットアップ作業一式（甲が実施）</li>
+  </ol>
+
+  <h2>第2条（利用プランおよび料金）</h2>
+  <p>乙は以下のプランを選択し、甲に申告する。</p>
+
+  <table class="plan-table">
+    <thead>
+      <tr>
+        <th>プラン名</th>
+        <th>月額料金（税込）</th>
+        <th>主な内容</th>
+        <th>選択</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>ライトプラン</td>
+        <td>¥5,500</td>
+        <td>AI自動応答・FAQ管理・会話ログ</td>
+        <td>□</td>
+      </tr>
+      <tr>
+        <td>スタンダードプラン</td>
+        <td>¥11,000</td>
+        <td>ライト＋問い合わせ管理・優先サポート</td>
+        <td>□</td>
+      </tr>
+      <tr>
+        <td>プレミアムプラン</td>
+        <td>¥22,000</td>
+        <td>スタンダード＋カスタム設定・月次レポート</td>
+        <td>□</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="note">初月（サービス開始月）は無料とする。2ヶ月目より上記月額料金が発生する。</div>
+
+  <h2>第3条（支払い方法）</h2>
+  <ol>
+    <li>料金は毎月末日締め、翌月末日払いとする。</li>
+    <li>支払い方法は銀行振込とし、振込先は甲が別途通知する。</li>
+    <li>振込手数料は乙の負担とする。</li>
+  </ol>
+
+  <h2>第4条（契約期間・自動更新）</h2>
+  <ol>
+    <li>本契約の有効期間はサービス開始日から1ヶ月とし、いずれかの当事者から解約の申し出がない限り、毎月自動更新される。</li>
+    <li>解約を希望する場合は、解約希望月の前月末日までに書面またはメールにて申し出ること。</li>
+    <li>月途中での解約の場合、当月分の返金は行わない。</li>
+  </ol>
+
+  <h2>第5条（乙の義務）</h2>
+  <ol>
+    <li>乙はLINE公式アカウントを自ら取得し、甲に必要な情報（チャンネルアクセストークン等）を提供するものとする。</li>
+    <li>乙は本サービスを法令および公序良俗に反する目的で使用してはならない。</li>
+    <li>乙は管理画面へのアクセス情報を適切に管理し、第三者に開示してはならない。</li>
+  </ol>
+
+  <h2>第6条（知的財産権）</h2>
+  <p>本サービスのシステム・プログラム・デザインに関する知的財産権は甲に帰属する。乙は本サービスを利用する権利を有するが、複製・改変・再配布することはできない。</p>
+
+  <h2>第7条（免責事項）</h2>
+  <ol>
+    <li>甲はAIの回答内容の正確性・完全性を保証しない。専門的判断は必ず有資格者が行うこと。</li>
+    <li>甲はLINEおよびAnthropic（Claude）等の外部サービスの障害・仕様変更による損害について責任を負わない。</li>
+    <li>甲の故意または重大な過失による損害を除き、甲の賠償責任は当該月の利用料金を上限とする。</li>
+  </ol>
+
+  <h2>第8条（秘密保持）</h2>
+  <p>甲乙は、本契約に関連して知り得た相手方の業務上の情報を、相手方の事前の書面による承諾なく第三者に開示・漏洩してはならない。本条の義務は本契約終了後も2年間存続する。</p>
+
+  <h2>第9条（個人情報）</h2>
+  <p>甲は乙の顧客情報の取り扱いにあたり、個人情報保護法を遵守し、適切に管理する。詳細はプライバシーポリシー（https://[ドメイン]/privacy）による。</p>
+
+  <h2>第10条（準拠法・合意管轄）</h2>
+  <p>本契約は日本法に準拠し、紛争は大阪地方裁判所を専属的合意管轄裁判所とする。</p>
+
+  <div class="sign-section">
+    <div class="sign-block">
+      <h3>甲（サービス提供者）</h3>
+      <p style="font-size:0.88rem;margin-bottom:12px;">合同会社エスコネクト<br>大阪府大阪市北区梅田１丁目２番2号<br>大阪駅前第２ビル 12F-12</p>
+      <div class="sign-line"></div>
+      <p class="sign-label">代表者署名・捺印</p>
+      <p style="margin-top:12px;font-size:0.88rem;">桜井 謙司　　　　㊞</p>
+    </div>
+    <div class="sign-block">
+      <h3>乙（利用者）</h3>
+      <p style="font-size:0.88rem;margin-bottom:12px;">事務所名：<br><br>住　　所：<br><br></p>
+      <div class="sign-line"></div>
+      <p class="sign-label">代表者署名・捺印</p>
+    </div>
+  </div>
+
+</div>
+</body>
+</html>
