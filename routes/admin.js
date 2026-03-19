@@ -82,6 +82,36 @@ router.get('/inquiries', requireAuth, async (req, res) => {
   res.render('inquiries', { inquiries });
 });
 
+// 営業先一括登録（初回のみ使用）
+router.get('/sales/seed', requireAuth, async (req, res) => {
+  const leads = [
+    { office: '川添社会保険労務士事務所', contact_name: '', email: 'info@sr-kawasoe.jp', notes: '宝塚市' },
+    { office: '笑社会保険労務士事務所', contact_name: '', email: 'info@sremi.pro', notes: '川西市' },
+    { office: '伊丹社労士事務所', contact_name: '西村', email: 'nishimura@hrm-t.com', notes: '伊丹市' },
+    { office: '古本社会保険労務士事務所', contact_name: '', email: 'info@sogohoken.net', notes: '宝塚市' },
+    { office: 'かなみ社会保険労務士事務所', contact_name: '永井', email: 'info@kanami-office.com', notes: '川西市' },
+    { office: 'みつや社労士事務所', contact_name: '石河秀樹', email: 'info@mitsuya-sr.com', notes: '伊丹市' },
+    { office: '柴田将司社会保険労務士事務所', contact_name: '柴田将司', email: 'mshibata.sr.office@gmail.com', notes: '伊丹市' },
+    { office: 'レガーメ社会保険労務士・FP事務所', contact_name: '鳥居昌子', email: 'info@legame-sr.com', notes: '宝塚市' },
+    { office: 'はみんぐふる社労士法人みやこ事務所', contact_name: '', email: 'info@miyakojimusyo.com', notes: '広域・宝塚対応' },
+    { office: 'Lチャート社会保険労務士事務所', contact_name: '酒井孝志', email: 'info@lchart-sr.com', notes: '三田市' },
+    { office: '植田社会保険労務士事務所', contact_name: '植田昌宏', email: 'ueda-syaroushi@celery.ocn.ne.jp', notes: '三田市' },
+    { office: 'オフィスH&M', contact_name: '北方克典', email: 'info@office-h-m.com', notes: '尼崎市' },
+    { office: 'ふたば社会保険労務士法人', contact_name: '山田眞裕子', email: 'mail@futaba-sr.com', notes: '西宮市' },
+    { office: '古澤社労士事務所', contact_name: '', email: 'info@furusawa-sr.jp', notes: '西宮市' },
+    { office: '福島労務サポートオフィス', contact_name: '福島達夫', email: '', notes: '宝塚市・フォーム: https://fk-support.com/' },
+    { office: 'Yours社会保険労務士事務所', contact_name: '片岡さゆり', email: '', notes: '宝塚市・フォーム: https://yours-sr.com/' },
+    { office: '牧江＆パートナーズ', contact_name: '牧江孝徳', email: '', notes: '西宮市・フォーム: https://www.makie-office.com/' },
+    { office: '社会保険労務士法人エビスガオ', contact_name: '中嶋功起', email: '', notes: '西宮市・フォーム: https://ebisu-face.com/' },
+    { office: 'かねくら社会保険労務士行政書士事務所', contact_name: '金倉正晃', email: '', notes: '西宮市・フォーム: https://www.kanekurasr.com/' },
+    { office: '中薗総合労務事務所', contact_name: '中薗博章', email: '', notes: '尼崎市・フォーム: https://nakazono-office.net/' },
+  ];
+  for (const l of leads) {
+    await db.addOutreach(l.office, l.contact_name, l.email, l.notes);
+  }
+  res.redirect('/admin/sales');
+});
+
 // 営業支援
 router.get('/sales', requireAuth, async (req, res) => {
   const leads = await db.getOutreach();
