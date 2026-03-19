@@ -121,7 +121,6 @@ function buildCategoryFlex(category) {
     style: 'secondary',
     height: 'sm',
     margin: 'sm',
-    color: '#1A3A5C',
   }));
 
   return {
