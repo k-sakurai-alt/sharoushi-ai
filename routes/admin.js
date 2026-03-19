@@ -274,6 +274,9 @@ router.post('/sales/add', requireAuth, async (req, res) => {
 router.post('/sales/update', requireAuth, async (req, res) => {
   const { id, status, notes } = req.body;
   await db.updateOutreachStatus(id, status, notes);
+  if (req.headers['x-requested-with'] === 'fetch') {
+    return res.json({ success: true });
+  }
   res.redirect('/admin/sales');
 });
 

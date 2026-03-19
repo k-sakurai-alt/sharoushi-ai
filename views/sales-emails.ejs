@@ -118,12 +118,7 @@
             <% const formUrl2 = (r.notes || '').match(/https?:\/\/[^\s]+/)?.[0] || '#'; %>
             <a href="<%= formUrl2 %>" target="_blank" class="btn-form">フォームを開く</a>
           <% } %>
-          <form action="/admin/sales/update" method="POST" style="display:inline;" onsubmit="markSent(this)">
-            <input type="hidden" name="id" value="<%= r.id %>">
-            <input type="hidden" name="notes" value="<%= r.notes || '' %>">
-            <input type="hidden" name="status" value="sent">
-            <button type="submit" class="btn-sent">送信済にする</button>
-          </form>
+          <button class="btn-sent" onclick="markSent(this, '<%= r.id %>', '<%= (r.notes || '').replace(/'/g, '') %>')">送信済にする</button>
         </div>
       </div>
       <div class="email-body">
@@ -144,10 +139,13 @@
       });
     }
 
-    function markSent(form) {
-      const btn = form.querySelector('.btn-sent');
+    async function markSent(btn, id, notes) {
+      if (btn.disabled) return;
+      btn.disabled = true;
       btn.classList.add('done');
       btn.textContent = '✓ 送信済';
+      const params = new URLSearchParams({ id, notes, status: 'sent' });
+      await fetch('/admin/sales/update', { method: 'POST', body: params, headers: { 'X-Requested-With': 'fetch' } });
     }
 
     function openGmail(i, toEmail) {
