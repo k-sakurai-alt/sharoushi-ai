@@ -144,7 +144,7 @@ router.post('/sales/generate', requireAuth, async (req, res) => {
 - 開発の背景にある実体験（先生方から聞いた話）を1〜2文で丁寧に盛り込む
 - シャロAIの説明は「LINEで自動対応・初月無料・設定はこちらで対応」を押しつけがましくなく一言で
 - 締めは「もしご関心をお持ちでしたら、お気軽にご返信いただければ幸いです。よろしくお願いいたします。」
-- 署名：桜井 謙司（合同会社エスコネクト / シャロAI）info@lp.sconnect.co.jp
+- 署名：桜井 謙司（合同会社エスコネクト）/ シャロAI: https://lp.sconnect.co.jp / info@lp.sconnect.co.jp
 
 【禁止事項】
 - 箇条書き
@@ -170,7 +170,7 @@ router.post('/sales/generate', requireAuth, async (req, res) => {
 - 150〜200文字程度（短く）
 - 責めない・催促しない・あくまで確認ベース
 - 1点だけ新しい情報（例：初月無料キャンペーン）を丁寧に添える
-- 署名は「桜井 謙司（シャロAI）」`,
+- 署名は「桜井 謙司（合同会社エスコネクト）/ シャロAI: https://lp.sconnect.co.jp / info@lp.sconnect.co.jp」`,
 
     proposal: `シャロAIの営業担当として、以下の事務所に向けた提案書の本文を作成してください。
 
@@ -240,7 +240,7 @@ router.get('/sales/generate-all', requireAuth, async (req, res) => {
 - 社労士先生が日々感じているであろう「同じ質問への対応疲れ」「夜間や休日の問い合わせ」という具体的なシーンに丁寧に触れる
 - シャロAIの特徴（LINEでAIが自動応答・初月無料・設定はこちらでやる）をさりげなく
 - 締めは「もしご関心をお持ちでしたら、お気軽にご返信いただければ幸いです。よろしくお願いいたします。」
-- 署名：桜井 謙司（合同会社エスコネクト / シャロAI）info@lp.sconnect.co.jp`;
+- 署名：桜井 謙司（合同会社エスコネクト）/ シャロAI: https://lp.sconnect.co.jp / info@lp.sconnect.co.jp`;
 
     try {
       const response = await axios.post(
