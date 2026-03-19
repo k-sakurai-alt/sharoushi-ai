@@ -96,7 +96,7 @@
           <div class="email-office"><%= i + 1 %>. <%= r.office %></div>
           <div class="email-to">
             <% if (r.email) { %>
-              送信先: <a href="mailto:<%= r.email %>"><%= r.email %></a>
+              送信先: <a href="https://mail.google.com/mail/?view=cm&to=<%= encodeURIComponent(r.email) %>" target="_blank"><%= r.email %></a>
               <span class="badge-type badge-email">メール</span>
             <% } else { %>
               <% const formUrl = (r.notes || '').match(/https?:\/\/[^\s]+/)?.[0] || ''; %>
@@ -109,8 +109,8 @@
         <div class="btn-group">
           <button class="btn-copy" onclick="copyEmail(<%= i %>)">コピー</button>
           <% if (r.email) { %>
-            <a href="mailto:<%= r.email %>?subject=&body=" class="btn-form" id="mailto-<%= i %>"
-               onclick="setMailto(<%= i %>)">メールを開く</a>
+            <a href="#" class="btn-form" id="gmail-<%= i %>"
+               onclick="openGmail(<%= i %>, '<%= r.email %>'); return false;">Gmailで送る</a>
           <% } else { %>
             <% const formUrl2 = (r.notes || '').match(/https?:\/\/[^\s]+/)?.[0] || '#'; %>
             <a href="<%= formUrl2 %>" target="_blank" class="btn-form">フォームを開く</a>
@@ -141,14 +141,15 @@
       });
     }
 
-    function setMailto(i) {
-      const text = encodeURIComponent(emails[i]);
-      const link = document.getElementById('mailto-' + i);
+    function openGmail(i, toEmail) {
       const lines = emails[i].split('\n');
-      const subjectLine = lines.find(l => l.startsWith('件名：') || l.startsWith('件名:'));
-      const subject = subjectLine ? encodeURIComponent(subjectLine.replace(/^件名[：:]/, '').trim()) : '';
-      const body = encodeURIComponent(emails[i]);
-      link.href = `mailto:${link.href.split('mailto:')[1].split('?')[0]}?subject=${subject}&body=${body}`;
+      const subjectLine = lines.find(l => /^件名[：:]/.test(l));
+      const subject = subjectLine ? subjectLine.replace(/^件名[：:]\s*/, '').trim() : '';
+      const bodyLines = subjectLine ? lines.slice(lines.indexOf(subjectLine) + 1) : lines;
+      const body = bodyLines.join('\n').trim();
+      const params = new URLSearchParams({ view: 'cm', su: subject, body });
+      if (toEmail) params.set('to', toEmail);
+      window.open('https://mail.google.com/mail/?' + params.toString(), '_blank');
     }
   </script>
 </body>
