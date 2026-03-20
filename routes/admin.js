@@ -307,12 +307,13 @@ router.get('/sales/generate-all', requireAuth, async (req, res) => {
     }
   };
 
-  // 5件ずつバッチ処理（レート制限対策）
+  // 3件ずつバッチ処理、バッチ間2秒待機（429レート制限対策）
   const results = [];
-  for (let i = 0; i < pendingLeads.length; i += 5) {
-    const batch = pendingLeads.slice(i, i + 5);
+  for (let i = 0; i < pendingLeads.length; i += 3) {
+    const batch = pendingLeads.slice(i, i + 3);
     const batchResults = await Promise.all(batch.map(generateEmail));
     results.push(...batchResults);
+    if (i + 3 < pendingLeads.length) await new Promise(r => setTimeout(r, 2000));
   }
 
   const remainingCount = allPending.length - pendingLeads.length;
@@ -564,10 +565,11 @@ router.get('/sales/generate-followup', requireAuth, async (req, res) => {
   };
 
   const results = [];
-  for (let i = 0; i < targetLeads.length; i += 5) {
-    const batch = targetLeads.slice(i, i + 5);
+  for (let i = 0; i < targetLeads.length; i += 3) {
+    const batch = targetLeads.slice(i, i + 3);
     const batchResults = await Promise.all(batch.map(generateFollowup));
     results.push(...batchResults);
+    if (i + 3 < targetLeads.length) await new Promise(r => setTimeout(r, 2000));
   }
 
   res.render('sales-emails', { results, pageTitle: 'フォローアップメール一括生成' });
