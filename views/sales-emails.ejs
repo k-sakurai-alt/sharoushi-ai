@@ -134,8 +134,10 @@
       <div><strong><%= results.length %></strong><span> 件のメールを生成</span></div>
       <div><strong><%= results.filter(r => r.email).length %></strong><span> 件はメール送信</span></div>
       <div><strong><%= results.filter(r => !r.email).length %></strong><span> 件はフォーム送信</span></div>
-      <button id="send-all-btn" onclick="sendAll()" style="margin-left:auto;background:#ea4335;color:white;border:none;border-radius:8px;padding:10px 22px;font-weight:700;font-size:0.88rem;cursor:pointer;">
-        ✉ メールアドレスあり全件を一括送信
+    </div>
+    <div style="margin-bottom:20px;">
+      <button id="send-all-btn" onclick="sendAll()" style="background:#ea4335;color:white;border:none;border-radius:10px;padding:13px 28px;font-weight:700;font-size:0.95rem;cursor:pointer;width:100%;">
+        ✉ メールアドレスあり <%= results.filter(r => r.email).length %> 件を一括送信
       </button>
     </div>
     <div id="send-all-progress" style="display:none;background:#1a3a5c;color:white;border-radius:10px;padding:14px 20px;margin-bottom:16px;font-size:0.88rem;"></div>
