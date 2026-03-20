@@ -43,8 +43,9 @@ router.get('/auth/google/callback', async (req, res) => {
 // メール送信API
 router.post('/admin/sales/send-email', async (req, res) => {
   if (!req.session.loggedIn) return res.status(401).json({ error: '未ログイン' });
-  const { to, subject, body } = req.body;
-  if (!to || !subject || !body) return res.status(400).json({ error: 'to/subject/bodyが必要です' });
+  const { to, body } = req.body;
+  const subject = req.body.subject || '社労士事務所様向けLINE AIサービス「シャロAI」のご紹介';
+  if (!to || !body) return res.status(400).json({ error: 'to/bodyが必要です' });
 
   try {
     const accessToken = await db.getSetting('google_access_token');
