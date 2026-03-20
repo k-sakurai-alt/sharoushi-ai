@@ -42,7 +42,7 @@ router.get('/auth/google/callback', async (req, res) => {
 
 // メール送信API
 router.post('/admin/sales/send-email', async (req, res) => {
-  if (!req.session.admin) return res.status(401).json({ error: '未ログイン' });
+  if (!req.session.loggedIn) return res.status(401).json({ error: '未ログイン' });
   const { to, subject, body } = req.body;
   if (!to || !subject || !body) return res.status(400).json({ error: 'to/subject/bodyが必要です' });
 
