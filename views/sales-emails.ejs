@@ -234,12 +234,13 @@
         });
         const data = await res.json();
         if (data.success) {
+          const { i, id, notes } = pendingSend;
           closeModal();
           // ステータスを送信済みに更新
-          const updateParams = new URLSearchParams({ id: pendingSend.id, notes: pendingSend.notes || '', status: 'sent' });
+          const updateParams = new URLSearchParams({ id, notes: notes || '', status: 'sent' });
           await fetch('/admin/sales/update', { method: 'POST', body: updateParams, headers: { 'X-Requested-With': 'fetch' } });
           // ボタンを送信済みに
-          const gmailBtn = document.getElementById('gmail-' + pendingSend.i);
+          const gmailBtn = document.getElementById('gmail-' + i);
           const sentBtn = gmailBtn?.closest('.btn-group')?.querySelector('.btn-sent');
           if (sentBtn) { sentBtn.disabled = true; sentBtn.classList.add('done'); sentBtn.textContent = '✓ 送信済'; }
           gmailBtn.textContent = '✓ 送信完了';
