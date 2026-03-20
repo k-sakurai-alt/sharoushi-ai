@@ -161,7 +161,7 @@
                onclick="openGmail(<%= i %>, '<%= r.email %>', '<%= r.id %>', '<%= (r.notes || '').replace(/'/g, '') %>'); return false;">Gmailで送る</a>
           <% } else { %>
             <% const formUrl2 = (r.notes || '').match(/https?:\/\/[^\s]+/)?.[0] || '#'; %>
-            <a href="<%= formUrl2 %>" target="_blank" class="btn-form">フォームを開く</a>
+            <a href="<%= formUrl2 %>" target="_blank" class="btn-form" onclick="copyEmail(<%= i %>)">フォームを開く（本文コピー）</a>
           <% } %>
           <button class="btn-sent" onclick="markSent(this, '<%= r.id %>', '<%= (r.notes || '').replace(/'/g, '') %>')">送信済にする</button>
         </div>
