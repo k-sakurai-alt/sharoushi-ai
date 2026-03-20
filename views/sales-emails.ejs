@@ -134,8 +134,11 @@
       <div><strong><%= results.length %></strong><span> 件のメールを生成</span></div>
       <div><strong><%= results.filter(r => r.email).length %></strong><span> 件はメール送信</span></div>
       <div><strong><%= results.filter(r => !r.email).length %></strong><span> 件はフォーム送信</span></div>
-      <span style="margin-left:auto;font-size:0.82rem;opacity:0.7;">送信後は営業リストでステータスを「送信済」に更新してください</span>
+      <button id="send-all-btn" onclick="sendAll()" style="margin-left:auto;background:#ea4335;color:white;border:none;border-radius:8px;padding:10px 22px;font-weight:700;font-size:0.88rem;cursor:pointer;">
+        ✉ メールアドレスあり全件を一括送信
+      </button>
     </div>
+    <div id="send-all-progress" style="display:none;background:#1a3a5c;color:white;border-radius:10px;padding:14px 20px;margin-bottom:16px;font-size:0.88rem;"></div>
 
     <% results.forEach((r, i) => { %>
     <div class="email-card">
@@ -163,7 +166,7 @@
             <% const formUrl2 = (r.notes || '').match(/https?:\/\/[^\s]+/)?.[0] || '#'; %>
             <a href="<%= formUrl2 %>" target="_blank" class="btn-form" onclick="copyEmail(<%= i %>)">フォームを開く（本文コピー）</a>
           <% } %>
-          <button class="btn-sent" onclick="markSent(this, '<%= r.id %>', '<%= (r.notes || '').replace(/'/g, '') %>')">送信済にする</button>
+          <button class="btn-sent" data-idx="<%= i %>" onclick="markSent(this, '<%= r.id %>', '<%= (r.notes || '').replace(/'/g, '') %>')">送信済にする</button>
         </div>
       </div>
       <div class="email-body">
@@ -196,6 +199,67 @@
       btn.textContent = '✓ 送信済';
       const params = new URLSearchParams({ id, notes, status: 'sent' });
       await fetch('/admin/sales/update', { method: 'POST', body: params, headers: { 'X-Requested-With': 'fetch' } });
+    }
+
+    const allResults = <%- JSON.stringify(results.map(r => ({ id: r.id, email: r.email, notes: r.notes || '' }))) %>;
+
+    async function sendAll() {
+      const emailItems = allResults.filter(r => r.email);
+      if (emailItems.length === 0) { alert('送信対象のメールアドレスがありません'); return; }
+      if (!confirm(`メールアドレスがある${emailItems.length}件を一括送信します。\n内容はテキストエリアで確認済みのものが送信されます。\nよろしいですか？`)) return;
+
+      const btn = document.getElementById('send-all-btn');
+      const progress = document.getElementById('send-all-progress');
+      btn.disabled = true;
+      btn.textContent = '送信中...';
+      progress.style.display = 'block';
+
+      // 各メールの本文・件名をテキストエリアから取得
+      const emails = emailItems.map((r, idx) => {
+        const globalIdx = allResults.indexOf(r);
+        const lines = getEmailText(globalIdx).split('\n');
+        const subjectLine = lines.find(l => /^件名[：:]/.test(l));
+        const subject = subjectLine ? subjectLine.replace(/^件名[：:]\s*/, '').trim() : '';
+        const bodyLines = subjectLine ? lines.slice(lines.indexOf(subjectLine) + 1) : lines;
+        const body = bodyLines.join('\n').trim();
+        return { to: r.email, subject, body, id: r.id, notes: r.notes };
+      });
+
+      let sent = 0, failed = 0;
+      // 10件ずつバッチ送信
+      for (let i = 0; i < emails.length; i += 10) {
+        const batch = emails.slice(i, i + 10);
+        progress.textContent = `送信中... ${Math.min(i + 10, emails.length)} / ${emails.length} 件`;
+        try {
+          const res = await fetch('/admin/sales/send-all', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ emails: batch }),
+          });
+          const data = await res.json();
+          if (data.needAuth) { alert('Gmail未連携です。先にGoogle認証してください。'); break; }
+          if (data.results) {
+            sent += data.results.filter(r => r.success).length;
+            failed += data.results.filter(r => !r.success).length;
+            // 送信済みボタンを更新
+            data.results.forEach(r => {
+              if (r.success) {
+                const idx = allResults.findIndex(a => a.email === r.to);
+                if (idx >= 0) {
+                  const sentBtn = document.querySelector(`[data-idx="${idx}"].btn-sent`);
+                  if (sentBtn) { sentBtn.disabled = true; sentBtn.classList.add('done'); sentBtn.textContent = '✓ 送信済'; }
+                  const gmailBtn = document.getElementById('gmail-' + idx);
+                  if (gmailBtn) { gmailBtn.textContent = '✓ 送信完了'; gmailBtn.style.background = '#27ae60'; }
+                }
+              }
+            });
+          }
+        } catch(e) {
+          failed += batch.length;
+        }
+      }
+      progress.textContent = `✅ 完了：${sent}件送信成功 / ${failed > 0 ? `${failed}件失敗` : '失敗なし'}`;
+      btn.textContent = `✉ 送信完了（${sent}件）`;
     }
 
     let pendingSend = null;
