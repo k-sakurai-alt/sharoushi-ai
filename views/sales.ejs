@@ -195,6 +195,20 @@
         </div>
       </div>
 
+      <!-- モニター募集 -->
+      <div class="agent-card" style="border-top-color:#e67e22;">
+        <h3>🎯 モニター募集メール</h3>
+        <p>完全無料モニターとして導入事例を作るための特別メール。返信率が通常の5〜10倍になります。</p>
+        <input type="text" id="mo-office" placeholder="事務所名（例：山田社労士事務所）">
+        <input type="email" id="mo-email" placeholder="送信先メールアドレス（任意）" style="margin-top:8px;">
+        <button class="btn-agent" style="background:#e67e22;" onclick="generate('monitor','mo')">✨ モニター募集メールを生成</button>
+        <div class="result-box" id="mo-result">
+          <button class="btn-gmail" onclick="openGmail('mo-text', document.getElementById('mo-email').value)">Gmailで送る</button>
+          <button class="btn-copy" onclick="copyText('mo-text')">コピー</button>
+          <pre id="mo-text"></pre>
+        </div>
+      </div>
+
       <!-- フォローアップ -->
       <div class="agent-card">
         <h3>🔄 フォローアップライター</h3>

@@ -176,6 +176,31 @@ router.post('/sales/generate', requireAuth, async (req, res) => {
 - 1点だけ新しい情報（例：初月無料キャンペーン）を丁寧に添える
 - 署名は書かない（システムが自動付与する）`,
 
+    monitor: `あなたは合同会社エスコネクトの桜井です。社労士事務所向けLINE AIサービス「シャロAI」の無料モニターを募集する営業メールを書いてください。
+
+事務所名: ${office}
+
+【絶対に守ること】
+- 全文をです・ます調で統一する
+- 宛名は「事務所名＋様」とする。個人名は使わない
+- 「〜させていただく」などの二重敬語を使わない
+- 「お世話になっております」「貴社の益々のご発展」などの古い定型文を使わない
+- アスタリスク・ハイフン区切りなどのマークダウン記号を使わない
+- 「本文：」「署名：」などのラベルを入れない
+- 件名も含めて出力
+- 本文は200〜260文字
+- 書き出しは「突然のご連絡、失礼いたします」から始める
+- 署名は書かない（システムが自動付与する）
+
+【メールの内容】
+- 「シャロAI」のモニター事務所を5社限定で募集していること
+- モニター期間中は初期費用・月額費用ともに完全無料であること
+- 社労士先生が日々感じている「同じ質問への対応疲れ」「夜間の問い合わせ」という具体的な課題に触れる
+- LINEでAIが自動応答する仕組みであること
+- 設定・導入はこちらで全て対応すること
+- 「モニターとして率直なご意見をいただきたい」という姿勢を丁寧に
+- 締めは「もしご関心をお持ちでしたら、お気軽にご返信いただければ幸いです。よろしくお願いいたします。」`,
+
     proposal: `シャロAIの営業担当として、以下の事務所に向けた提案書の本文を作成してください。
 
 事務所名: ${office}
@@ -212,7 +237,7 @@ router.post('/sales/generate', requireAuth, async (req, res) => {
     );
     const SIGNATURE = `桜井 謙司（合同会社エスコネクト）/ シャロAI: https://lp.sconnect.co.jp / info@lp.sconnect.co.jp`;
     let text = response.data.content[0].text.trim();
-    if (agent_type === 'cold_email' || agent_type === 'followup') {
+    if (agent_type === 'cold_email' || agent_type === 'followup' || agent_type === 'monitor') {
       text = text.replace(/桜井[^\n]*エスコネクト[^\n]*/g, '').replace(/info@lp\.sconnect\.co\.jp[^\n]*/g, '').trimEnd();
       text = `${text}\n\n${SIGNATURE}`;
     }
