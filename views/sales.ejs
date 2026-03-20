@@ -162,8 +162,8 @@
         </div>
         <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
           <button onclick="previewLeads()" style="background:#8e44ad;color:white;padding:9px 20px;border:none;border-radius:8px;font-weight:700;font-size:0.85rem;cursor:pointer;">プレビュー</button>
-          <form action="/admin/sales/reimport-hyogo" method="POST" style="margin:0;" onsubmit="return confirm('住所になっている誤データを削除し、正しい事務所名で255件を再インポートします。よろしいですか？')">
-            <button type="submit" style="background:#e74c3c;color:white;padding:9px 20px;border:none;border-radius:8px;font-weight:700;font-size:0.85rem;cursor:pointer;">修正して再インポート</button>
+          <form action="/admin/sales/import-hyogo" method="POST" style="margin:0;" onsubmit="return confirm('255件を営業リストにインポートします。重複は自動スキップされます。よろしいですか？')">
+            <button type="submit" style="background:#1a3a5c;color:white;padding:9px 20px;border:none;border-radius:8px;font-weight:700;font-size:0.85rem;cursor:pointer;">一括インポート</button>
           </form>
         </div>
       </div>
