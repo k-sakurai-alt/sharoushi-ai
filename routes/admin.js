@@ -1,7 +1,10 @@
 const express = require('express');
 const db = require('../db/database');
+const multer = require('multer');
+const { parse } = require('csv-parse/sync');
 
 const router = express.Router();
+const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 5 * 1024 * 1024 } });
 
 function requireAuth(req, res, next) {
   if (req.session && req.session.loggedIn) return next();
@@ -285,6 +288,41 @@ router.post('/sales/update', requireAuth, async (req, res) => {
 router.post('/sales/delete', requireAuth, async (req, res) => {
   await db.deleteOutreach(req.body.id);
   res.redirect('/admin/sales');
+});
+
+// CSV一括インポート
+router.post('/sales/import-csv', requireAuth, upload.single('csvfile'), async (req, res) => {
+  if (!req.file) return res.redirect('/admin/sales?error=no_file');
+  try {
+    const content = req.file.buffer.toString('utf-8').replace(/^\uFEFF/, ''); // BOM除去
+    const records = parse(content, { columns: true, skip_empty_lines: true, trim: true });
+
+    let added = 0;
+    let skipped = 0;
+    const existing = await db.getOutreach();
+    const existingEmails = new Set(existing.map(r => r.email).filter(Boolean));
+    const existingOffices = new Set(existing.map(r => r.office));
+
+    for (const row of records) {
+      const office = row.office || row['事務所名'] || '';
+      const email = row.email || row['メール'] || row['メールアドレス'] || '';
+      const notes = row.notes || row.form_url || row['フォームURL'] || '';
+      const contactName = row.name || row['担当者名'] || '';
+
+      if (!office) { skipped++; continue; }
+      // 重複チェック（メアドまたは事務所名で判定）
+      if (email && existingEmails.has(email)) { skipped++; continue; }
+      if (!email && existingOffices.has(office)) { skipped++; continue; }
+
+      await db.addOutreach(office, contactName, email, notes);
+      added++;
+    }
+
+    res.redirect(`/admin/sales?import_added=${added}&import_skipped=${skipped}`);
+  } catch (e) {
+    console.error('CSV import error:', e);
+    res.redirect('/admin/sales?error=import_failed');
+  }
 });
 
 module.exports = router;
