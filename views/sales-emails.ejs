@@ -200,7 +200,7 @@
       const bodyLines = subjectLine ? lines.slice(lines.indexOf(subjectLine) + 1) : lines;
       const body = bodyLines.join('\n').trim();
 
-      document.getElementById('modal-subject').textContent = '件名: ' + subject;
+      document.getElementById('modal-subject').textContent = subject;
       document.getElementById('modal-to').textContent = '送信先: ' + toEmail;
       document.getElementById('modal-body').textContent = body;
       document.getElementById('confirmModal').classList.add('active');
