@@ -304,7 +304,7 @@ router.get('/sales/leads-preview', requireAuth, async (req, res) => {
   const preview = records.map(row => {
     const email = row.email || '';
     const office = row.office || '';
-    const isDuplicate = (email && existingEmails.has(email)) || (!email && existingOffices.has(office));
+    const isDuplicate = existingOffices.has(office) || (email && existingEmails.has(email));
     return { office, email, phone: row.phone || '', isDuplicate };
   });
   res.json({ total: preview.length, newCount: preview.filter(r => !r.isDuplicate).length, records: preview.slice(0, 50) });
@@ -324,13 +324,15 @@ router.post('/sales/import-hyogo', requireAuth, async (req, res) => {
     const existingEmails = new Set(existing.map(r => r.email).filter(Boolean));
     const existingOffices = new Set(existing.map(r => r.office));
     for (const row of records) {
-      const office = row.office || '';
-      const email = row.email || '';
+      const office = (row.office || '').trim();
+      const email = (row.email || '').trim().toLowerCase();
       const notes = row.notes || row.form_url || '';
       if (!office) { skipped++; continue; }
+      if (existingOffices.has(office)) { skipped++; continue; }
       if (email && existingEmails.has(email)) { skipped++; continue; }
-      if (!email && existingOffices.has(office)) { skipped++; continue; }
-      await db.addOutreach(office, '', email, notes);
+      await db.addOutreach(office, '', email || null, notes);
+      existingOffices.add(office);
+      if (email) existingEmails.add(email);
       added++;
     }
     res.redirect(`/admin/sales?import_added=${added}&import_skipped=${skipped}`);
@@ -360,11 +362,13 @@ router.post('/sales/import-csv', requireAuth, upload.single('csvfile'), async (r
       const contactName = row.name || row['担当者名'] || '';
 
       if (!office) { skipped++; continue; }
-      // 重複チェック（メアドまたは事務所名で判定）
+      // 事務所名 OR メアドどちらか一致で重複とみなす
+      if (existingOffices.has(office)) { skipped++; continue; }
       if (email && existingEmails.has(email)) { skipped++; continue; }
-      if (!email && existingOffices.has(office)) { skipped++; continue; }
 
       await db.addOutreach(office, contactName, email, notes);
+      existingOffices.add(office);
+      if (email) existingEmails.add(email);
       added++;
     }
 
