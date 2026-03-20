@@ -118,7 +118,10 @@ router.get('/sales/seed', requireAuth, async (req, res) => {
 // 営業支援
 router.get('/sales', requireAuth, async (req, res) => {
   const leads = await db.getOutreach();
-  res.render('sales', { leads, query: req.query });
+  // フォローアップ対象（sent & 7日以上経過）
+  const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
+  const followupCount = leads.filter(l => l.status === 'sent' && new Date(l.updated_at) <= sevenDaysAgo).length;
+  res.render('sales', { leads, query: req.query, followupCount });
 });
 
 router.post('/sales/generate', requireAuth, async (req, res) => {
@@ -503,6 +506,61 @@ router.post('/sales/import-csv', requireAuth, upload.single('csvfile'), async (r
     console.error('CSV import error:', e);
     res.redirect('/admin/sales?error=import_failed');
   }
+});
+
+// フォローアップ一括生成（sent & 7日以上経過）
+router.get('/sales/generate-followup', requireAuth, async (req, res) => {
+  const axios = require('axios');
+  const leads = await db.getOutreach();
+  const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
+  const targetLeads = leads.filter(l => l.status === 'sent' && new Date(l.updated_at) <= sevenDaysAgo);
+
+  if (targetLeads.length === 0) {
+    return res.redirect('/admin/sales?followup_none=1');
+  }
+
+  const SIGNATURE = `桜井 謙司（合同会社エスコネクト）/ シャロAI: https://lp.sconnect.co.jp / info@lp.sconnect.co.jp`;
+
+  const generateFollowup = async (lead) => {
+    const prompt = `シャロAIの営業担当として、以下の事務所に1週間前に営業メールを送ったが返信がない状況です。
+フォローアップメールを作成してください。
+
+事務所名: ${lead.office}
+担当者名: ${lead.contact_name || ''}
+
+【要件】
+- 件名も含めて出力
+- 宛名は「事務所名＋様」とする（例：○○社会保険労務士事務所様）。個人名は使わない
+- 全文をです・ます調で統一する（くだけた表現・話し言葉は使わない）
+- 「〜させていただく」「ご提供させていただく」などの二重敬語を使わない
+- アスタリスク（*）・ハイフン区切り（---）などのマークダウン記号を一切使わない
+- 150〜200文字程度（短く）
+- 責めない・催促しない・あくまで確認ベース
+- 1点だけ新しい情報（例：初月無料キャンペーン、5社限定モニター募集中）を丁寧に添える
+- 署名は書かない（システムが自動付与する）`;
+
+    try {
+      const response = await axios.post(
+        'https://api.anthropic.com/v1/messages',
+        { model: 'claude-haiku-4-5-20251001', max_tokens: 512, messages: [{ role: 'user', content: prompt }] },
+        { headers: { 'x-api-key': process.env.ANTHROPIC_API_KEY, 'anthropic-version': '2023-06-01', 'content-type': 'application/json' } }
+      );
+      const generated = response.data.content[0].text.trim();
+      const withoutSig = generated.replace(/桜井[^\n]*エスコネクト[^\n]*/g, '').replace(/info@lp\.sconnect\.co\.jp[^\n]*/g, '').trimEnd();
+      return { ...lead, generatedEmail: `${withoutSig}\n\n${SIGNATURE}` };
+    } catch (e) {
+      return { ...lead, generatedEmail: '生成エラー: ' + e.message };
+    }
+  };
+
+  const results = [];
+  for (let i = 0; i < targetLeads.length; i += 5) {
+    const batch = targetLeads.slice(i, i + 5);
+    const batchResults = await Promise.all(batch.map(generateFollowup));
+    results.push(...batchResults);
+  }
+
+  res.render('sales-emails', { results, pageTitle: 'フォローアップメール一括生成' });
 });
 
 module.exports = router;
