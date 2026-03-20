@@ -147,7 +147,7 @@ router.post('/sales/generate', requireAuth, async (req, res) => {
 - 開発の背景にある実体験（先生方から聞いた話）を1〜2文で丁寧に盛り込む
 - シャロAIの説明は「LINEで自動対応・初月無料・設定はこちらで対応」を押しつけがましくなく一言で
 - 締めは「もしご関心をお持ちでしたら、お気軽にご返信いただければ幸いです。よろしくお願いいたします。」
-- 署名：桜井 謙司（合同会社エスコネクト）/ シャロAI: https://lp.sconnect.co.jp / info@lp.sconnect.co.jp
+- 署名は書かない（システムが自動付与する）
 
 【禁止事項】
 - 箇条書き
@@ -174,7 +174,7 @@ router.post('/sales/generate', requireAuth, async (req, res) => {
 - 150〜200文字程度（短く）
 - 責めない・催促しない・あくまで確認ベース
 - 1点だけ新しい情報（例：初月無料キャンペーン）を丁寧に添える
-- 署名は「桜井 謙司（合同会社エスコネクト）/ シャロAI: https://lp.sconnect.co.jp / info@lp.sconnect.co.jp」`,
+- 署名は書かない（システムが自動付与する）`,
 
     proposal: `シャロAIの営業担当として、以下の事務所に向けた提案書の本文を作成してください。
 
@@ -210,7 +210,12 @@ router.post('/sales/generate', requireAuth, async (req, res) => {
         },
       }
     );
-    const text = response.data.content[0].text;
+    const SIGNATURE = `桜井 謙司（合同会社エスコネクト）/ シャロAI: https://lp.sconnect.co.jp / info@lp.sconnect.co.jp`;
+    let text = response.data.content[0].text.trim();
+    if (agent_type === 'cold_email' || agent_type === 'followup') {
+      text = text.replace(/桜井[^\n]*エスコネクト[^\n]*/g, '').replace(/info@lp\.sconnect\.co\.jp[^\n]*/g, '').trimEnd();
+      text = `${text}\n\n${SIGNATURE}`;
+    }
     res.json({ result: text });
   } catch (e) {
     res.json({ error: 'AI生成に失敗しました: ' + e.message });
@@ -245,7 +250,9 @@ router.get('/sales/generate-all', requireAuth, async (req, res) => {
 - 社労士先生が日々感じているであろう「同じ質問への対応疲れ」「夜間や休日の問い合わせ」という具体的なシーンに丁寧に触れる
 - シャロAIの特徴（LINEでAIが自動応答・初月無料・設定はこちらでやる）をさりげなく
 - 締めは「もしご関心をお持ちでしたら、お気軽にご返信いただければ幸いです。よろしくお願いいたします。」
-- 署名：桜井 謙司（合同会社エスコネクト）/ シャロAI: https://lp.sconnect.co.jp / info@lp.sconnect.co.jp`;
+- 署名は書かない（システムが自動付与する）`;
+
+    const SIGNATURE = `桜井 謙司（合同会社エスコネクト）/ シャロAI: https://lp.sconnect.co.jp / info@lp.sconnect.co.jp`;
 
     try {
       const response = await axios.post(
@@ -253,7 +260,11 @@ router.get('/sales/generate-all', requireAuth, async (req, res) => {
         { model: 'claude-haiku-4-5-20251001', max_tokens: 1024, messages: [{ role: 'user', content: prompt }] },
         { headers: { 'x-api-key': process.env.ANTHROPIC_API_KEY, 'anthropic-version': '2023-06-01', 'content-type': 'application/json' } }
       );
-      return { ...lead, generatedEmail: response.data.content[0].text };
+      const generated = response.data.content[0].text.trim();
+      // AIが署名を書いてしまった場合に備えて除去してから固定署名を付与
+      const withoutSig = generated.replace(/桜井[^\n]*エスコネクト[^\n]*/g, '').replace(/info@lp\.sconnect\.co\.jp[^\n]*/g, '').trimEnd();
+      const finalEmail = `${withoutSig}\n\n${SIGNATURE}`;
+      return { ...lead, generatedEmail: finalEmail };
     } catch (e) {
       return { ...lead, generatedEmail: '生成エラー: ' + e.message };
     }
@@ -268,6 +279,52 @@ router.get('/sales/generate-all', requireAuth, async (req, res) => {
   }
 
   res.render('sales-emails', { results });
+});
+
+// 一括送信API
+router.post('/admin/sales/send-all', async (req, res) => {
+  if (!req.session.loggedIn) return res.status(401).json({ error: '未ログイン' });
+  const { emails } = req.body; // [{to, subject, body, id, notes}]
+  if (!Array.isArray(emails) || emails.length === 0) return res.status(400).json({ error: 'emailsが必要です' });
+
+  const { google } = require('googleapis');
+  const oauth2Client = new google.auth.OAuth2(
+    process.env.GOOGLE_CLIENT_ID, process.env.GOOGLE_CLIENT_SECRET, process.env.GOOGLE_REDIRECT_URI
+  );
+  const accessToken = await db.getSetting('google_access_token');
+  const refreshToken = await db.getSetting('google_refresh_token');
+  if (!refreshToken) return res.status(400).json({ error: 'Gmail未連携', needAuth: true });
+  oauth2Client.setCredentials({ access_token: accessToken, refresh_token: refreshToken });
+  oauth2Client.on('tokens', async (tokens) => {
+    if (tokens.access_token) await db.setSetting('google_access_token', tokens.access_token);
+  });
+  const gmail = google.gmail({ version: 'v1', auth: oauth2Client });
+
+  const results = [];
+  for (const item of emails) {
+    try {
+      const subject = item.subject || '社労士事務所様向けLINE AIサービス「シャロAI」のご紹介';
+      const message = [
+        `From: =?UTF-8?B?${Buffer.from('シャロAI（社労士向けLINE AI）').toString('base64')}?= <info@lp.sconnect.co.jp>`,
+        `To: ${item.to}`,
+        `Subject: =?UTF-8?B?${Buffer.from(subject).toString('base64')}?=`,
+        `MIME-Version: 1.0`,
+        `Content-Type: text/plain; charset=UTF-8`,
+        `Content-Transfer-Encoding: base64`,
+        ``,
+        Buffer.from(item.body).toString('base64'),
+      ].join('\r\n');
+      const encoded = Buffer.from(message).toString('base64').replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+      await gmail.users.messages.send({ userId: 'me', requestBody: { raw: encoded } });
+      // ステータスを送信済みに更新
+      if (item.id) await db.updateOutreachStatus(item.id, 'sent', item.notes || '');
+      results.push({ to: item.to, success: true });
+      await new Promise(r => setTimeout(r, 500)); // 送信間隔
+    } catch (e) {
+      results.push({ to: item.to, success: false, error: e.message });
+    }
+  }
+  res.json({ results });
 });
 
 router.post('/sales/add', requireAuth, async (req, res) => {
