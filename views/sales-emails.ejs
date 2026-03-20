@@ -171,7 +171,7 @@
                onclick="openGmail(<%= i %>, '<%= r.email %>', '<%= r.id %>', '<%= (r.notes || '').replace(/'/g, '') %>'); return false;">Gmailで送る</a>
           <% } else { %>
             <% const formUrl2 = (r.notes || '').match(/https?:\/\/[^\s]+/)?.[0] || '#'; %>
-            <a href="<%= formUrl2 %>" target="_blank" class="btn-form" onclick="copyEmail(<%= i %>)">フォームを開く（本文コピー）</a>
+            <a href="<%= formUrl2 %>" target="_blank" class="btn-form" onclick="setTimeout(()=>copyEmail(<%= i %>),0)">フォームを開く（本文コピー）</a>
           <% } %>
           <button class="btn-sent" data-idx="<%= i %>" onclick="markSent(this, '<%= r.id %>', '<%= (r.notes || '').replace(/'/g, '') %>')">送信済にする</button>
         </div>
@@ -192,11 +192,27 @@
     }
 
     function copyEmail(i) {
-      navigator.clipboard.writeText(getEmailText(i)).then(() => {
-        const btn = event.target;
-        btn.textContent = '✓ コピー済';
-        setTimeout(() => btn.textContent = 'コピー', 1500);
-      });
+      const text = getEmailText(i);
+      const btn = event.target;
+      // clipboard API が使えない場合はtextareaフォールバック
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(text).then(() => {
+          btn.textContent = '✓ コピー済';
+          setTimeout(() => { if (btn.textContent === '✓ コピー済') btn.textContent = 'コピー'; }, 1500);
+        }).catch(() => fallbackCopy(text));
+      } else {
+        fallbackCopy(text);
+      }
+    }
+
+    function fallbackCopy(text) {
+      const ta = document.createElement('textarea');
+      ta.value = text;
+      ta.style.position = 'fixed'; ta.style.opacity = '0';
+      document.body.appendChild(ta);
+      ta.select();
+      document.execCommand('copy');
+      document.body.removeChild(ta);
     }
 
     async function markSent(btn, id, notes) {
