@@ -320,7 +320,7 @@ router.get('/sales/generate-all', requireAuth, async (req, res) => {
 });
 
 // 一括送信API
-router.post('/admin/sales/send-all', async (req, res) => {
+router.post('/sales/send-all', async (req, res) => {
   if (!req.session.loggedIn) return res.status(401).json({ error: '未ログイン' });
   const { emails } = req.body; // [{to, subject, body, id, notes}]
   if (!Array.isArray(emails) || emails.length === 0) return res.status(400).json({ error: 'emailsが必要です' });
