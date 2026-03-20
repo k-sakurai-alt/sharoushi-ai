@@ -62,9 +62,52 @@
     }
     .summary-bar span { font-size: 0.88rem; opacity: 0.85; }
     .summary-bar strong { font-size: 1.2rem; color: #f39c12; }
+
+    /* 確認モーダル */
+    .modal-overlay {
+      display: none; position: fixed; inset: 0;
+      background: rgba(0,0,0,0.5); z-index: 1000;
+      align-items: center; justify-content: center;
+    }
+    .modal-overlay.active { display: flex; }
+    .modal {
+      background: white; border-radius: 16px; padding: 28px;
+      max-width: 600px; width: 90%; max-height: 80vh;
+      overflow-y: auto; box-shadow: 0 8px 32px rgba(0,0,0,0.2);
+    }
+    .modal h3 { margin: 0 0 8px; color: #1a3a5c; font-size: 1rem; }
+    .modal .modal-to { font-size: 0.85rem; color: #7f8c8d; margin-bottom: 16px; }
+    .modal pre {
+      background: #f8fafc; border: 1px solid #dde3ea; border-radius: 8px;
+      padding: 14px; font-size: 0.85rem; line-height: 1.8;
+      white-space: pre-wrap; font-family: inherit; margin-bottom: 20px;
+    }
+    .modal-btns { display: flex; gap: 10px; justify-content: flex-end; }
+    .btn-cancel {
+      background: #ecf0f1; color: #7f8c8d; border: none;
+      border-radius: 8px; padding: 10px 22px; font-weight: 700; cursor: pointer;
+    }
+    .btn-confirm {
+      background: #ea4335; color: white; border: none;
+      border-radius: 8px; padding: 10px 22px; font-weight: 700; cursor: pointer;
+    }
+    .btn-confirm:disabled { background: #aaa; cursor: not-allowed; }
   </style>
 </head>
 <body>
+
+<!-- 確認モーダル -->
+<div class="modal-overlay" id="confirmModal">
+  <div class="modal">
+    <h3 id="modal-subject"></h3>
+    <div class="modal-to" id="modal-to"></div>
+    <pre id="modal-body"></pre>
+    <div class="modal-btns">
+      <button class="btn-cancel" onclick="closeModal()">キャンセル</button>
+      <button class="btn-confirm" id="modal-send-btn" onclick="confirmSend()">この内容で送信する</button>
+    </div>
+  </div>
+</div>
   <nav class="navbar">
     <span class="nav-brand">AIアシスタント管理</span>
     <div class="nav-links">
@@ -148,27 +191,62 @@
       await fetch('/admin/sales/update', { method: 'POST', body: params, headers: { 'X-Requested-With': 'fetch' } });
     }
 
+    let pendingSend = null;
+
     function openGmail(i, toEmail, id, notes) {
       const lines = emails[i].split('\n');
       const subjectLine = lines.find(l => /^件名[：:]/.test(l));
       const subject = subjectLine ? subjectLine.replace(/^件名[：:]\s*/, '').trim() : '';
       const bodyLines = subjectLine ? lines.slice(lines.indexOf(subjectLine) + 1) : lines;
       const body = bodyLines.join('\n').trim();
-      const params = new URLSearchParams({ view: 'cm', from: 'info@lp.sconnect.co.jp', su: subject, body });
-      if (toEmail) params.set('to', toEmail);
-      window.open('https://mail.google.com/mail/?' + params.toString(), '_blank');
 
-      // Gmail送信後にステータスを自動で送信済みに更新
-      if (id) {
-        const btn = document.getElementById('gmail-' + i);
-        const sentBtn = btn?.closest('.btn-group')?.querySelector('.btn-sent');
-        const updateParams = new URLSearchParams({ id, notes: notes || '', status: 'sent' });
-        fetch('/admin/sales/update', { method: 'POST', body: updateParams, headers: { 'X-Requested-With': 'fetch' } });
-        if (sentBtn && !sentBtn.disabled) {
-          sentBtn.disabled = true;
-          sentBtn.classList.add('done');
-          sentBtn.textContent = '✓ 送信済';
+      document.getElementById('modal-subject').textContent = '件名: ' + subject;
+      document.getElementById('modal-to').textContent = '送信先: ' + toEmail;
+      document.getElementById('modal-body').textContent = body;
+      document.getElementById('confirmModal').classList.add('active');
+
+      pendingSend = { i, toEmail, id, notes, subject, body };
+    }
+
+    function closeModal() {
+      document.getElementById('confirmModal').classList.remove('active');
+      pendingSend = null;
+    }
+
+    async function confirmSend() {
+      if (!pendingSend) return;
+      const btn = document.getElementById('modal-send-btn');
+      btn.disabled = true;
+      btn.textContent = '送信中...';
+
+      try {
+        const res = await fetch('/admin/sales/send-email', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ to: pendingSend.toEmail, subject: pendingSend.subject, body: pendingSend.body }),
+        });
+        const data = await res.json();
+        if (data.success) {
+          closeModal();
+          // ステータスを送信済みに更新
+          const updateParams = new URLSearchParams({ id: pendingSend.id, notes: pendingSend.notes || '', status: 'sent' });
+          await fetch('/admin/sales/update', { method: 'POST', body: updateParams, headers: { 'X-Requested-With': 'fetch' } });
+          // ボタンを送信済みに
+          const gmailBtn = document.getElementById('gmail-' + pendingSend.i);
+          const sentBtn = gmailBtn?.closest('.btn-group')?.querySelector('.btn-sent');
+          if (sentBtn) { sentBtn.disabled = true; sentBtn.classList.add('done'); sentBtn.textContent = '✓ 送信済'; }
+          gmailBtn.textContent = '✓ 送信完了';
+          gmailBtn.style.background = '#27ae60';
+        } else if (data.needAuth) {
+          if (confirm('Gmail未連携です。今すぐ連携しますか？')) location.href = '/auth/google';
+        } else {
+          alert('送信エラー: ' + data.error);
         }
+      } catch(e) {
+        alert('通信エラーが発生しました');
+      } finally {
+        btn.disabled = false;
+        btn.textContent = 'この内容で送信する';
       }
     }
   </script>
