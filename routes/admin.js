@@ -290,6 +290,56 @@ router.post('/sales/delete', requireAuth, async (req, res) => {
   res.redirect('/admin/sales');
 });
 
+// 収集済みリストプレビュー
+router.get('/sales/leads-preview', requireAuth, async (req, res) => {
+  const fs = require('fs');
+  const path = require('path');
+  const csvPath = path.join(__dirname, '../scripts/hyogo_leads.csv');
+  if (!fs.existsSync(csvPath)) return res.json({ error: 'ファイルが見つかりません' });
+  const content = fs.readFileSync(csvPath, 'utf-8').replace(/^\uFEFF/, '');
+  const records = parse(content, { columns: true, skip_empty_lines: true, trim: true });
+  const existing = await db.getOutreach();
+  const existingEmails = new Set(existing.map(r => r.email).filter(Boolean));
+  const existingOffices = new Set(existing.map(r => r.office));
+  const preview = records.map(row => {
+    const email = row.email || '';
+    const office = row.office || '';
+    const isDuplicate = (email && existingEmails.has(email)) || (!email && existingOffices.has(office));
+    return { office, email, phone: row.phone || '', isDuplicate };
+  });
+  res.json({ total: preview.length, newCount: preview.filter(r => !r.isDuplicate).length, records: preview.slice(0, 50) });
+});
+
+// サーバー上のCSVをそのままインポート
+router.post('/sales/import-hyogo', requireAuth, async (req, res) => {
+  const fs = require('fs');
+  const path = require('path');
+  const csvPath = path.join(__dirname, '../scripts/hyogo_leads.csv');
+  if (!fs.existsSync(csvPath)) return res.redirect('/admin/sales?error=no_file');
+  try {
+    const content = fs.readFileSync(csvPath, 'utf-8').replace(/^\uFEFF/, '');
+    const records = parse(content, { columns: true, skip_empty_lines: true, trim: true });
+    let added = 0, skipped = 0;
+    const existing = await db.getOutreach();
+    const existingEmails = new Set(existing.map(r => r.email).filter(Boolean));
+    const existingOffices = new Set(existing.map(r => r.office));
+    for (const row of records) {
+      const office = row.office || '';
+      const email = row.email || '';
+      const notes = row.notes || row.form_url || '';
+      if (!office) { skipped++; continue; }
+      if (email && existingEmails.has(email)) { skipped++; continue; }
+      if (!email && existingOffices.has(office)) { skipped++; continue; }
+      await db.addOutreach(office, '', email, notes);
+      added++;
+    }
+    res.redirect(`/admin/sales?import_added=${added}&import_skipped=${skipped}`);
+  } catch (e) {
+    console.error('import-hyogo error:', e);
+    res.redirect('/admin/sales?error=import_failed');
+  }
+});
+
 // CSV一括インポート
 router.post('/sales/import-csv', requireAuth, upload.single('csvfile'), async (req, res) => {
   if (!req.file) return res.redirect('/admin/sales?error=no_file');
