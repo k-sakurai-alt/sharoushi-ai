@@ -24,9 +24,11 @@
       background: #f8fafc; border: 1px solid #dde3ea;
       border-radius: 10px; padding: 16px; position: relative;
     }
-    .email-body pre {
-      white-space: pre-wrap; font-size: 0.88rem; line-height: 1.8;
-      color: #2c3e50; font-family: inherit;
+    .email-body textarea {
+      width: 100%; font-size: 0.88rem; line-height: 1.8;
+      color: #2c3e50; font-family: inherit; border: none;
+      background: transparent; resize: vertical; outline: none;
+      min-height: 200px;
     }
     .btn-group { display: flex; gap: 8px; flex-wrap: wrap; }
     .btn-copy {
@@ -165,7 +167,7 @@
         </div>
       </div>
       <div class="email-body">
-        <pre id="email-text-<%= i %>"><%= r.generatedEmail %></pre>
+        <textarea id="email-text-<%= i %>"><%= r.generatedEmail %></textarea>
       </div>
     </div>
     <% }) %>
@@ -174,8 +176,13 @@
   <script>
     const emails = <%- JSON.stringify(results.map(r => r.generatedEmail)) %>;
 
+    function getEmailText(i) {
+      const ta = document.getElementById('email-text-' + i);
+      return ta ? ta.value : emails[i];
+    }
+
     function copyEmail(i) {
-      navigator.clipboard.writeText(emails[i]).then(() => {
+      navigator.clipboard.writeText(getEmailText(i)).then(() => {
         const btn = event.target;
         btn.textContent = '✓ コピー済';
         setTimeout(() => btn.textContent = 'コピー', 1500);
@@ -194,7 +201,7 @@
     let pendingSend = null;
 
     function openGmail(i, toEmail, id, notes) {
-      const lines = emails[i].split('\n');
+      const lines = getEmailText(i).split('\n');
       const subjectLine = lines.find(l => /^件名[：:]/.test(l));
       const subject = subjectLine ? subjectLine.replace(/^件名[：:]\s*/, '').trim() : '';
       const bodyLines = subjectLine ? lines.slice(lines.indexOf(subjectLine) + 1) : lines;
