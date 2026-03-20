@@ -260,7 +260,9 @@ router.post('/sales/generate', requireAuth, async (req, res) => {
 router.get('/sales/generate-all', requireAuth, async (req, res) => {
   const axios = require('axios');
   const leads = await db.getOutreach();
-  const pendingLeads = leads.filter(l => l.status === 'pending');
+  const allPending = leads.filter(l => l.status === 'pending');
+  const MAX = 30; // 一度に生成する上限（タイムアウト防止）
+  const pendingLeads = allPending.slice(0, MAX);
 
   const generateEmail = async (lead) => {
     const prompt = `あなたは合同会社エスコネクトの桜井です。社労士事務所向けにLINE AIサービス「シャロAI」を提供しています。
@@ -313,7 +315,8 @@ router.get('/sales/generate-all', requireAuth, async (req, res) => {
     results.push(...batchResults);
   }
 
-  res.render('sales-emails', { results });
+  const remainingCount = allPending.length - pendingLeads.length;
+  res.render('sales-emails', { results, pageTitle: '一括営業メール生成結果', remainingCount });
 });
 
 // 一括送信API
