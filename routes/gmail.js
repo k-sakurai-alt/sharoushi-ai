@@ -62,7 +62,7 @@ router.post('/admin/sales/send-email', async (req, res) => {
     const gmail = google.gmail({ version: 'v1', auth: oauth2Client });
 
     const message = [
-      `From: 桜井 謙司 <info@lp.sconnect.co.jp>`,
+      `From: =?UTF-8?B?${Buffer.from('桜井 謙司').toString('base64')}?= <info@lp.sconnect.co.jp>`,
       `To: ${to}`,
       `Subject: =?UTF-8?B?${Buffer.from(subject).toString('base64')}?=`,
       `MIME-Version: 1.0`,
