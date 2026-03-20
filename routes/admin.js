@@ -339,17 +339,26 @@ router.post('/sales/send-all', async (req, res) => {
   });
   const gmail = google.gmail({ version: 'v1', auth: oauth2Client });
 
+  // 実際の送信元アドレスをGmail APIから取得（Fromアドレス詐称を防ぐ）
+  let senderEmail = 'me';
+  try {
+    const profile = await gmail.users.getProfile({ userId: 'me' });
+    senderEmail = profile.data.emailAddress;
+  } catch(e) { /* 取得失敗時はGmailのデフォルト */ }
+
   const results = [];
   for (const item of emails) {
     try {
       const subject = item.subject || '社労士事務所様向けLINE AIサービス「シャロAI」のご紹介';
       const message = [
-        `From: =?UTF-8?B?${Buffer.from('シャロAI（社労士向けLINE AI）').toString('base64')}?= <info@lp.sconnect.co.jp>`,
+        `From: =?UTF-8?B?${Buffer.from('桜井 謙司（合同会社エスコネクト）').toString('base64')}?= <${senderEmail}>`,
         `To: ${item.to}`,
         `Subject: =?UTF-8?B?${Buffer.from(subject).toString('base64')}?=`,
         `MIME-Version: 1.0`,
         `Content-Type: text/plain; charset=UTF-8`,
         `Content-Transfer-Encoding: base64`,
+        `List-Unsubscribe: <mailto:${senderEmail}?subject=unsubscribe>`,
+        `Precedence: personal`,
         ``,
         Buffer.from(item.body).toString('base64'),
       ].join('\r\n');
@@ -358,7 +367,7 @@ router.post('/sales/send-all', async (req, res) => {
       // ステータスを送信済みに更新
       if (item.id) await db.updateOutreachStatus(item.id, 'sent', item.notes || '');
       results.push({ to: item.to, success: true });
-      await new Promise(r => setTimeout(r, 500)); // 送信間隔
+      await new Promise(r => setTimeout(r, 3000)); // 送信間隔3秒（迷惑メール対策）
     } catch (e) {
       results.push({ to: item.to, success: false, error: e.message });
     }

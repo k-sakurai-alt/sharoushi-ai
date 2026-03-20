@@ -62,13 +62,22 @@ router.post('/admin/sales/send-email', async (req, res) => {
 
     const gmail = google.gmail({ version: 'v1', auth: oauth2Client });
 
+    // 実際の送信元アドレスを取得
+    let senderEmail = 'me';
+    try {
+      const profile = await gmail.users.getProfile({ userId: 'me' });
+      senderEmail = profile.data.emailAddress;
+    } catch(e) { /* 取得失敗時はGmailのデフォルト */ }
+
     const message = [
-      `From: =?UTF-8?B?${Buffer.from('シャロAI（社労士向けLINE AI）').toString('base64')}?= <info@lp.sconnect.co.jp>`,
+      `From: =?UTF-8?B?${Buffer.from('桜井 謙司（合同会社エスコネクト）').toString('base64')}?= <${senderEmail}>`,
       `To: ${to}`,
       `Subject: =?UTF-8?B?${Buffer.from(subject).toString('base64')}?=`,
       `MIME-Version: 1.0`,
       `Content-Type: text/plain; charset=UTF-8`,
       `Content-Transfer-Encoding: base64`,
+      `List-Unsubscribe: <mailto:${senderEmail}?subject=unsubscribe>`,
+      `Precedence: personal`,
       ``,
       Buffer.from(body).toString('base64'),
     ].join('\r\n');
