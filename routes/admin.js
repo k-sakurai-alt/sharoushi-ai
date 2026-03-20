@@ -290,6 +290,50 @@ router.post('/sales/delete', requireAuth, async (req, res) => {
   res.redirect('/admin/sales');
 });
 
+// 住所になっている誤データを削除してCSVから再インポート
+router.post('/sales/reimport-hyogo', requireAuth, async (req, res) => {
+  const fs = require('fs');
+  const path = require('path');
+  try {
+    // 住所パターン（市・区・町・村を含む）のofficeを削除
+    const existing = await db.getOutreach();
+    const addressPattern = /[市区町村]|〒|\d{3}-\d{4}|丁目|番地|ビル|号室/;
+    for (const row of existing) {
+      if (addressPattern.test(row.office)) {
+        await db.deleteOutreach(row.id);
+      }
+    }
+
+    // 正しいCSVを再インポート
+    const csvPath = path.join(__dirname, '../scripts/hyogo_leads.csv');
+    if (!fs.existsSync(csvPath)) return res.redirect('/admin/sales?error=no_file');
+    const content = fs.readFileSync(csvPath, 'utf-8').replace(/^\uFEFF/, '');
+    const records = parse(content, { columns: true, skip_empty_lines: true, trim: true });
+
+    const remaining = await db.getOutreach();
+    const existingEmails = new Set(remaining.map(r => r.email).filter(Boolean));
+    const existingOffices = new Set(remaining.map(r => r.office));
+
+    let added = 0, skipped = 0;
+    for (const row of records) {
+      const office = (row.office || '').trim();
+      const email = (row.email || '').trim().toLowerCase();
+      const notes = row.notes || row.form_url || '';
+      if (!office || addressPattern.test(office)) { skipped++; continue; }
+      if (existingOffices.has(office)) { skipped++; continue; }
+      if (email && existingEmails.has(email)) { skipped++; continue; }
+      await db.addOutreach(office, '', email || null, notes);
+      existingOffices.add(office);
+      if (email) existingEmails.add(email);
+      added++;
+    }
+    res.redirect(`/admin/sales?import_added=${added}&import_skipped=${skipped}`);
+  } catch (e) {
+    console.error('reimport error:', e);
+    res.redirect('/admin/sales?error=import_failed');
+  }
+});
+
 // 収集済みリストプレビュー
 router.get('/sales/leads-preview', requireAuth, async (req, res) => {
   const fs = require('fs');

@@ -64,10 +64,10 @@ def scrape_detail(entry):
     emails = [e for e in emails if not re.search(r'\.(png|jpg|gif)$', e, re.I)]
     email = emails[0] if emails else ''
 
-    # 事務所名抽出（テーブルから）
+    # 事務所名抽出（th+td形式のテーブルから）
     office_name = ''
     for row in soup.find_all('tr'):
-        cells = row.find_all('td')
+        cells = row.find_all(['th', 'td'])
         if len(cells) >= 2:
             label = cells[0].get_text(strip=True)
             value = cells[1].get_text(strip=True)
