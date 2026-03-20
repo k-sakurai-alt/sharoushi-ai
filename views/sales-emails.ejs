@@ -113,7 +113,7 @@
           <button class="btn-copy" onclick="copyEmail(<%= i %>)">コピー</button>
           <% if (r.email) { %>
             <a href="#" class="btn-form" id="gmail-<%= i %>"
-               onclick="openGmail(<%= i %>, '<%= r.email %>'); return false;">Gmailで送る</a>
+               onclick="openGmail(<%= i %>, '<%= r.email %>', '<%= r.id %>', '<%= (r.notes || '').replace(/'/g, '') %>'); return false;">Gmailで送る</a>
           <% } else { %>
             <% const formUrl2 = (r.notes || '').match(/https?:\/\/[^\s]+/)?.[0] || '#'; %>
             <a href="<%= formUrl2 %>" target="_blank" class="btn-form">フォームを開く</a>
@@ -148,7 +148,7 @@
       await fetch('/admin/sales/update', { method: 'POST', body: params, headers: { 'X-Requested-With': 'fetch' } });
     }
 
-    function openGmail(i, toEmail) {
+    function openGmail(i, toEmail, id, notes) {
       const lines = emails[i].split('\n');
       const subjectLine = lines.find(l => /^件名[：:]/.test(l));
       const subject = subjectLine ? subjectLine.replace(/^件名[：:]\s*/, '').trim() : '';
@@ -157,6 +157,19 @@
       const params = new URLSearchParams({ view: 'cm', from: 'info@lp.sconnect.co.jp', su: subject, body });
       if (toEmail) params.set('to', toEmail);
       window.open('https://mail.google.com/mail/?' + params.toString(), '_blank');
+
+      // Gmail送信後にステータスを自動で送信済みに更新
+      if (id) {
+        const btn = document.getElementById('gmail-' + i);
+        const sentBtn = btn?.closest('.btn-group')?.querySelector('.btn-sent');
+        const updateParams = new URLSearchParams({ id, notes: notes || '', status: 'sent' });
+        fetch('/admin/sales/update', { method: 'POST', body: updateParams, headers: { 'X-Requested-With': 'fetch' } });
+        if (sentBtn && !sentBtn.disabled) {
+          sentBtn.disabled = true;
+          sentBtn.classList.add('done');
+          sentBtn.textContent = '✓ 送信済';
+        }
+      }
     }
   </script>
 </body>
