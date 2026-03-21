@@ -598,4 +598,29 @@ router.get('/sales/generate-followup', requireAuth, async (req, res) => {
   res.render('sales-emails', { results, pageTitle: 'フォローアップメール一括生成' });
 });
 
+// HP URLをCSVから既存レコードのnotesに反映
+router.post('/sales/patch-hp-urls', requireAuth, async (req, res) => {
+  const fs = require('fs');
+  const path = require('path');
+  const csvPath = path.join(__dirname, '../scripts/hyogo_leads.csv');
+  if (!fs.existsSync(csvPath)) return res.redirect('/admin/sales?error=no_file');
+  try {
+    const content = fs.readFileSync(csvPath, 'utf-8').replace(/^\uFEFF/, '');
+    const records = parse(content, { columns: true, skip_empty_lines: true, trim: true });
+    let updated = 0;
+    for (const row of records) {
+      const office = (row.office || '').trim();
+      const notes = (row.notes || '').trim();
+      if (office && notes) {
+        await db.updateOutreachNotes(office, notes);
+        updated++;
+      }
+    }
+    res.redirect(`/admin/sales?import_added=${updated}&import_skipped=0`);
+  } catch (e) {
+    console.error('patch-hp-urls error:', e);
+    res.redirect('/admin/sales?error=import_failed');
+  }
+});
+
 module.exports = router;

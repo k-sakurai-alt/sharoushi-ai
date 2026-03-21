@@ -51,7 +51,7 @@ def get_detail_links(soup):
     return links
 
 def scrape_detail(entry):
-    """詳細ページからメアド・事務所名を取得"""
+    """詳細ページからメアド・事務所名・HP URLを取得"""
     r = fetch(entry['url'])
     if not r:
         return entry
@@ -64,20 +64,36 @@ def scrape_detail(entry):
     emails = [e for e in emails if not re.search(r'\.(png|jpg|gif)$', e, re.I)]
     email = emails[0] if emails else ''
 
-    # 事務所名抽出（th+td形式のテーブルから）
+    # 事務所名・HP URL抽出（th+td形式のテーブルから）
     office_name = ''
+    hp_url = ''
     for row in soup.find_all('tr'):
         cells = row.find_all(['th', 'td'])
         if len(cells) >= 2:
             label = cells[0].get_text(strip=True)
             value = cells[1].get_text(strip=True)
-            if '事務所名' in label:
+            if '事務所名' in label and not office_name:
                 office_name = value
+            if any(k in label for k in ['ホームページ', 'HP', 'URL', 'ウェブ', 'Web', 'WEB']) and not hp_url:
+                # tdの中のaタグからURLを取得
+                a = cells[1].find('a', href=True)
+                if a:
+                    hp_url = a['href']
+                elif re.match(r'https?://', value):
+                    hp_url = value
+
+    # aタグから外部リンクを補完（テーブルにない場合）
+    if not hp_url:
+        for a in soup.find_all('a', href=re.compile(r'^https?://')):
+            href = a['href']
+            if 'hyogosr.gr.jp' not in href and 'google' not in href:
+                hp_url = href
                 break
 
     result = dict(entry)
     result['email'] = email
     result['office'] = office_name or entry.get('name', '')
+    result['hp_url'] = hp_url
     return result
 
 def main():
@@ -106,7 +122,8 @@ def main():
         print(f'[{i+1:3d}/{len(target)}] {entry["name"][:20]:20s}', end=' ', flush=True)
         result = scrape_detail(entry)
         email = result.get('email', '')
-        print(f'→ {email if email else "メアドなし":40s} {result.get("office","")[:25]}')
+        hp = result.get('hp_url', '')
+        print(f'→ {email if email else "メアドなし":40s} HP:{hp[:30] if hp else "なし"}')
         results.append(result)
         time.sleep(0.8)
 
@@ -121,13 +138,15 @@ def main():
                 'email': r.get('email', ''),
                 'phone': r.get('phone', ''),
                 'address': r.get('address', ''),
-                'notes': ''
+                'notes': r.get('hp_url', '')
             })
 
     email_count = sum(1 for r in results if r.get('email'))
+    hp_count = sum(1 for r in results if r.get('hp_url'))
     print(f'\n=== 完了 ===')
     print(f'取得件数: {len(results)}件')
     print(f'メアドあり: {email_count}件 ({email_count*100//len(results) if results else 0}%)')
+    print(f'HP URLあり: {hp_count}件 ({hp_count*100//len(results) if results else 0}%)')
     print(f'出力: {OUTPUT_FILE}')
 
 if __name__ == '__main__':
