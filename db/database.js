@@ -173,10 +173,14 @@ async function updateOutreachNotes(office, notes) {
   );
 }
 
+async function updateOutreachNotesById(id, notes) {
+  await pool.query('UPDATE outreach SET notes = $1 WHERE id = $2', [notes, id]);
+}
+
 module.exports = {
   getSetting, setSetting, getAllSettings,
   addFaq, getFaqs, deleteFaq,
   saveConversation, getConversations, getRecentHistory,
   saveInquiry, getInquiries,
-  addOutreach, getOutreach, updateOutreachStatus, deleteOutreach, updateOutreachNotes,
+  addOutreach, getOutreach, updateOutreachStatus, deleteOutreach, updateOutreachNotes, updateOutreachNotesById,
 };
