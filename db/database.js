@@ -166,10 +166,17 @@ async function deleteOutreach(id) {
   await pool.query('DELETE FROM outreach WHERE id = $1', [id]);
 }
 
+async function updateOutreachNotes(office, notes) {
+  await pool.query(
+    'UPDATE outreach SET notes = $1 WHERE office = $2',
+    [notes, office]
+  );
+}
+
 module.exports = {
   getSetting, setSetting, getAllSettings,
   addFaq, getFaqs, deleteFaq,
   saveConversation, getConversations, getRecentHistory,
   saveInquiry, getInquiries,
-  addOutreach, getOutreach, updateOutreachStatus, deleteOutreach,
+  addOutreach, getOutreach, updateOutreachStatus, deleteOutreach, updateOutreachNotes,
 };
