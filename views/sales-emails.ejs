@@ -178,7 +178,7 @@
             <% if (formUrl3) { %>
               <a href="<%= formUrl3 %>" target="_blank" class="btn-form">HPを開く</a>
             <% } else { %>
-              <a href="https://www.google.com/search?q=<%= encodeURIComponent(r.office) %>" target="_blank" class="btn-form" style="background:#7f8c8d;">HP検索</a>
+              <button class="btn-form" id="hp-btn-<%= r.id %>" style="background:#7f8c8d;" onclick="findHp(this, '<%= r.id %>', '<%= r.office.replace(/'/g,'') %>', '<%= (r.address||'').replace(/'/g,'') %>')">HPを探す</button>
             <% } %>
           <% } %>
           <button class="btn-sent" data-idx="<%= i %>" onclick="markSent(this, '<%= r.id %>', '<%= (r.notes || '').replace(/'/g, '') %>')">送信済にする</button>
@@ -197,6 +197,30 @@
     function getEmailText(i) {
       const ta = document.getElementById('email-text-' + i);
       return ta ? ta.value : emails[i];
+    }
+
+    async function findHp(btn, id, office, address) {
+      btn.textContent = '検索中...';
+      btn.disabled = true;
+      try {
+        const res = await fetch('/admin/sales/find-hp', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ id, office, address }),
+        });
+        const data = await res.json();
+        if (data.url) {
+          // URLが見つかった → ボタンをリンクに差し替えて開く
+          btn.outerHTML = `<a href="${data.url}" target="_blank" class="btn-form">HPを開く</a>`;
+          window.open(data.url, '_blank');
+        } else {
+          btn.textContent = 'HPなし';
+          btn.style.background = '#aaa';
+        }
+      } catch(e) {
+        btn.textContent = 'エラー';
+        btn.disabled = false;
+      }
     }
 
     function copyEmail(i) {

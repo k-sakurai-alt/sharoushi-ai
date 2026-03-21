@@ -598,6 +598,31 @@ router.get('/sales/generate-followup', requireAuth, async (req, res) => {
   res.render('sales-emails', { results, pageTitle: 'フォローアップメール一括生成' });
 });
 
+// 事務所名・住所でHP URLを自動検索して保存
+router.post('/sales/find-hp', requireAuth, async (req, res) => {
+  const axios = require('axios');
+  const { id, office, address } = req.body;
+  const query = encodeURIComponent(`${office} 社労士 公式サイト`);
+  try {
+    const r = await axios.get(`https://html.duckduckgo.com/html/?q=${query}`, {
+      headers: { 'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36' },
+      timeout: 8000,
+    });
+    // DDGのHTMLから最初の外部リンクを抽出
+    const matches = r.data.match(/uddg=([^&"]+)/g) || [];
+    const urls = matches
+      .map(m => decodeURIComponent(m.replace('uddg=', '')))
+      .filter(u => u.startsWith('http') && !u.includes('duckduckgo') && !u.includes('google'));
+    const url = urls[0] || null;
+    if (url && id) {
+      await db.updateOutreachNotesById(id, url);
+    }
+    res.json({ url });
+  } catch(e) {
+    res.json({ url: null });
+  }
+});
+
 // HP URLをCSVから既存レコードのnotesに反映
 router.post('/sales/patch-hp-urls', requireAuth, async (req, res) => {
   const fs = require('fs');
