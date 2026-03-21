@@ -128,7 +128,8 @@
     <div style="display:flex; align-items:center; gap:16px; margin-bottom:20px; flex-wrap:wrap;">
       <h2 style="margin:0;"><%= locals.pageTitle || '一括営業メール生成結果' %></h2>
       <a href="/admin/sales" style="font-size:0.85rem; color:#7f8c8d;">← 営業リストに戻る</a>
-      <a href="/admin/sales/generate-all" style="margin-left:auto;background:#2e86c1;color:white;padding:9px 20px;border-radius:8px;font-weight:700;font-size:0.88rem;text-decoration:none;">✨ 次の30件を生成</a>
+      <a href="/admin/sales/view-emails" style="margin-left:auto;background:#7f8c8d;color:white;padding:9px 20px;border-radius:8px;font-weight:700;font-size:0.88rem;text-decoration:none;">再表示</a>
+      <a href="/admin/sales/generate-all" style="background:#2e86c1;color:white;padding:9px 20px;border-radius:8px;font-weight:700;font-size:0.88rem;text-decoration:none;">✨ 次の30件を生成</a>
     </div>
 
     <% if (locals.remainingCount > 0) { %>

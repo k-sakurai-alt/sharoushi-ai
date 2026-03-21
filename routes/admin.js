@@ -322,7 +322,16 @@ ${isForm
   }
 
   const remainingCount = allPending.length - pendingLeads.length;
+  // 生成結果をセッションに保存（再表示用）
+  req.session.lastGeneratedEmails = { results, remainingCount };
   res.render('sales-emails', { results, pageTitle: '一括営業メール生成結果', remainingCount });
+});
+
+// 生成済みメールを再表示（再生成しない）
+router.get('/sales/view-emails', requireAuth, (req, res) => {
+  const saved = req.session.lastGeneratedEmails;
+  if (!saved) return res.redirect('/admin/sales/generate-all');
+  res.render('sales-emails', { results: saved.results, pageTitle: '一括営業メール生成結果', remainingCount: saved.remainingCount });
 });
 
 // 一括送信API
