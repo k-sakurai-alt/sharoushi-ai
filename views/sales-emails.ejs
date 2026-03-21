@@ -177,6 +177,8 @@
             <% const formUrl3 = (r.notes || '').match(/https?:\/\/[^\s]+/)?.[0]; %>
             <% if (formUrl3) { %>
               <a href="<%= formUrl3 %>" target="_blank" class="btn-form">HPを開く</a>
+            <% } else { %>
+              <a href="https://www.google.com/search?q=<%= encodeURIComponent(r.office) %>" target="_blank" class="btn-form" style="background:#7f8c8d;">HP検索</a>
             <% } %>
           <% } %>
           <button class="btn-sent" data-idx="<%= i %>" onclick="markSent(this, '<%= r.id %>', '<%= (r.notes || '').replace(/'/g, '') %>')">送信済にする</button>
