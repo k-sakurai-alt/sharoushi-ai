@@ -136,7 +136,10 @@
         <div><div style="font-size:1.8rem;font-weight:900;color:#27ae60;"><%= closed %></div><div style="font-size:0.8rem;color:#7f8c8d;">成約済み</div></div>
         <div><div style="font-size:1.8rem;font-weight:900;color:#f39c12;">¥<%= (closed * 10000).toLocaleString() %></div><div style="font-size:0.8rem;color:#7f8c8d;">月額売上（想定）</div></div>
       </div>
-      <a href="/admin/sales/generate-all" style="display:inline-block;background:#2e86c1;color:white;padding:10px 22px;border-radius:10px;font-weight:700;font-size:0.9rem;text-decoration:none;white-space:nowrap;">✨ 一括メール生成</a>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;">
+        <a href="/admin/sales/view-emails" style="display:inline-block;background:#7f8c8d;color:white;padding:10px 18px;border-radius:10px;font-weight:700;font-size:0.9rem;text-decoration:none;white-space:nowrap;">生成済みを表示</a>
+        <a href="/admin/sales/generate-all" style="display:inline-block;background:#2e86c1;color:white;padding:10px 22px;border-radius:10px;font-weight:700;font-size:0.9rem;text-decoration:none;white-space:nowrap;">✨ 次の30件を生成</a>
+      </div>
       </div>
       <div class="progress-label">月20万円達成まで（目標：20社）<%= pct %>%</div>
       <div class="progress-bar"><div class="progress-fill" style="width:<%= pct %>%"></div></div>
