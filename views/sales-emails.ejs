@@ -170,8 +170,8 @@
             <a href="#" class="btn-form" id="gmail-<%= i %>"
                onclick="openGmail(<%= i %>, '<%= r.email %>', '<%= r.id %>', '<%= (r.notes || '').replace(/'/g, '') %>'); return false;">Gmailで送る</a>
           <% } else { %>
-            <% const formUrl2 = (r.notes || '').match(/https?:\/\/[^\s]+/)?.[0] || '#'; %>
-            <a href="<%= formUrl2 %>" target="_blank" class="btn-form" onclick="setTimeout(()=>copyEmail(<%= i %>),0)">フォームを開く（本文コピー）</a>
+            <button class="btn-copy" onclick="copySubject(<%= i %>)" style="background:#8e44ad;">件名コピー</button>
+            <button class="btn-copy" onclick="copyBody(<%= i %>)" style="background:#e67e22;">本文コピー</button>
           <% } %>
           <button class="btn-sent" data-idx="<%= i %>" onclick="markSent(this, '<%= r.id %>', '<%= (r.notes || '').replace(/'/g, '') %>')">送信済にする</button>
         </div>
@@ -203,6 +203,29 @@
       } else {
         fallbackCopy(text);
       }
+    }
+
+    function copySubject(i) {
+      const text = getEmailText(i);
+      const lines = text.split('\n');
+      const subjectLine = lines.find(l => /^件名[：:]/.test(l));
+      const subject = subjectLine ? subjectLine.replace(/^件名[：:]\s*/, '').trim() : '';
+      const btn = event.target;
+      fallbackCopy(subject);
+      btn.textContent = '✓ コピー済';
+      setTimeout(() => btn.textContent = '件名コピー', 1500);
+    }
+
+    function copyBody(i) {
+      const text = getEmailText(i);
+      const lines = text.split('\n');
+      const subjectLine = lines.find(l => /^件名[：:]/.test(l));
+      const bodyLines = subjectLine ? lines.slice(lines.indexOf(subjectLine) + 1) : lines;
+      const body = bodyLines.join('\n').trim();
+      const btn = event.target;
+      fallbackCopy(body);
+      btn.textContent = '✓ コピー済';
+      setTimeout(() => btn.textContent = '本文コピー', 1500);
     }
 
     function fallbackCopy(text) {
