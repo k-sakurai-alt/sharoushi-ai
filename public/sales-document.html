@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>シャロAI｜サービス紹介資料</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'Hiragino Kaku Gothic ProN', 'Yu Gothic', sans-serif; color: #1a2a3a; background: white; }
+
+    /* ページ設定 */
+    @page { size: A4; margin: 0; }
+    @media print {
+      .page { page-break-after: always; }
+      .page:last-child { page-break-after: avoid; }
+    }
+    .page {
+      width: 210mm; min-height: 297mm;
+      margin: 0 auto; padding: 14mm 16mm;
+      position: relative;
+    }
+
+    /* 表紙 */
+    .cover { background: linear-gradient(150deg, #1a3a5c 0%, #0d4a7a 60%, #1a6fa8 100%); color: white; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; }
+    .cover-logo { font-size: 3.2rem; font-weight: 900; letter-spacing: 0.05em; margin-bottom: 8px; }
+    .cover-logo span { color: #06c755; }
+    .cover-tagline { font-size: 1.15rem; opacity: 0.85; margin-bottom: 40px; }
+    .cover-title { font-size: 1.4rem; font-weight: 800; background: rgba(255,255,255,0.12); border-radius: 12px; padding: 16px 32px; margin-bottom: 48px; }
+    .cover-badges { display: flex; gap: 16px; flex-wrap: wrap; justify-content: center; }
+    .cover-badge { background: rgba(255,255,255,0.15); border-radius: 20px; padding: 8px 20px; font-size: 0.85rem; font-weight: 700; }
+    .cover-footer { position: absolute; bottom: 14mm; font-size: 0.78rem; opacity: 0.6; }
+
+    /* 共通 */
+    .page-header { display: flex; align-items: center; gap: 12px; margin-bottom: 24px; padding-bottom: 12px; border-bottom: 3px solid #1a3a5c; }
+    .page-header h2 { font-size: 1.3rem; font-weight: 900; color: #1a3a5c; }
+    .page-num { margin-left: auto; background: #1a3a5c; color: white; width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.8rem; font-weight: 700; }
+    .section-label { font-size: 0.7rem; font-weight: 800; color: #2e86c1; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 4px; }
+    .accent { color: #2e86c1; }
+    .orange { color: #e67e22; }
+
+    /* 課題セクション */
+    .problem-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 24px; }
+    .problem-card { background: #f8fafc; border-left: 4px solid #e74c3c; border-radius: 8px; padding: 14px 16px; }
+    .problem-card .icon { font-size: 1.4rem; margin-bottom: 6px; }
+    .problem-card h4 { font-size: 0.9rem; font-weight: 800; color: #1a3a5c; margin-bottom: 4px; }
+    .problem-card p { font-size: 0.78rem; color: #5a6a7a; line-height: 1.6; }
+    .solution-box { background: linear-gradient(135deg, #1a3a5c, #0d4a7a); color: white; border-radius: 12px; padding: 20px 24px; text-align: center; }
+    .solution-box h3 { font-size: 1.15rem; font-weight: 900; margin-bottom: 6px; }
+    .solution-box h3 span { color: #f39c12; }
+    .solution-box p { font-size: 0.82rem; opacity: 0.85; }
+
+    /* 機能セクション */
+    .feature-list { display: flex; flex-direction: column; gap: 14px; }
+    .feature-item { display: flex; gap: 16px; align-items: flex-start; background: #f8fafc; border-radius: 10px; padding: 14px 16px; }
+    .feature-icon { font-size: 1.8rem; flex-shrink: 0; }
+    .feature-item h4 { font-size: 0.92rem; font-weight: 800; color: #1a3a5c; margin-bottom: 4px; }
+    .feature-item p { font-size: 0.78rem; color: #5a6a7a; line-height: 1.6; }
+    .feature-badge { display: inline-block; background: #eaf4fb; color: #2e86c1; font-size: 0.7rem; font-weight: 800; padding: 2px 8px; border-radius: 10px; margin-left: 6px; }
+
+    /* 料金セクション */
+    .pricing-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px; margin-bottom: 20px; }
+    .plan { border: 2px solid #dde3ea; border-radius: 12px; padding: 18px 14px; text-align: center; position: relative; }
+    .plan.popular { border-color: #2e86c1; }
+    .plan-popular-badge { position: absolute; top: -12px; left: 50%; transform: translateX(-50%); background: #2e86c1; color: white; font-size: 0.7rem; font-weight: 800; padding: 3px 12px; border-radius: 20px; white-space: nowrap; }
+    .plan-free-badge { display: inline-block; background: #fff3cd; color: #d97706; font-size: 0.68rem; font-weight: 800; padding: 2px 10px; border-radius: 10px; margin-bottom: 6px; }
+    .plan-name { font-size: 0.85rem; font-weight: 800; color: #1a3a5c; margin-bottom: 4px; }
+    .plan-price { font-size: 1.6rem; font-weight: 900; color: #1a3a5c; margin-bottom: 8px; }
+    .plan-price span { font-size: 0.75rem; font-weight: 400; color: #7f8c8d; }
+    .plan-features { list-style: none; text-align: left; }
+    .plan-features li { font-size: 0.72rem; color: #5a6a7a; padding: 3px 0; border-bottom: 1px solid #f0f0f0; }
+    .plan-features li::before { content: '✓ '; color: #27ae60; font-weight: 700; }
+    .pricing-note { font-size: 0.78rem; color: #7f8c8d; text-align: center; background: #f8fafc; border-radius: 8px; padding: 10px; }
+
+    /* 導入フロー */
+    .flow-steps { display: flex; flex-direction: column; gap: 0; }
+    .flow-step { display: flex; gap: 16px; align-items: flex-start; position: relative; padding-bottom: 20px; }
+    .flow-step:last-child { padding-bottom: 0; }
+    .flow-step::before { content: ''; position: absolute; left: 19px; top: 40px; width: 2px; height: calc(100% - 20px); background: #dde3ea; }
+    .flow-step:last-child::before { display: none; }
+    .step-num { width: 40px; height: 40px; background: #1a3a5c; color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1rem; font-weight: 900; flex-shrink: 0; }
+    .step-content h4 { font-size: 0.92rem; font-weight: 800; color: #1a3a5c; margin-bottom: 3px; }
+    .step-content p { font-size: 0.78rem; color: #5a6a7a; line-height: 1.6; }
+    .step-duration { display: inline-block; background: #eaf4fb; color: #2e86c1; font-size: 0.68rem; font-weight: 800; padding: 2px 8px; border-radius: 10px; margin-left: 8px; }
+
+    /* FAQ */
+    .faq-list { display: flex; flex-direction: column; gap: 12px; }
+    .faq-item { background: #f8fafc; border-radius: 10px; padding: 14px 16px; }
+    .faq-q { font-size: 0.88rem; font-weight: 800; color: #1a3a5c; margin-bottom: 6px; }
+    .faq-q::before { content: 'Q. '; color: #2e86c1; }
+    .faq-a { font-size: 0.78rem; color: #5a6a7a; line-height: 1.7; }
+    .faq-a::before { content: 'A. '; color: #27ae60; font-weight: 700; }
+
+    /* お問い合わせ */
+    .contact-box { background: linear-gradient(135deg, #1a3a5c, #0d4a7a); color: white; border-radius: 16px; padding: 28px 32px; text-align: center; margin-bottom: 20px; }
+    .contact-box h3 { font-size: 1.2rem; font-weight: 900; margin-bottom: 8px; }
+    .contact-box p { font-size: 0.85rem; opacity: 0.85; margin-bottom: 20px; }
+    .contact-info { display: flex; justify-content: center; gap: 32px; flex-wrap: wrap; }
+    .contact-info-item { font-size: 0.88rem; }
+    .contact-info-item .label { font-size: 0.7rem; opacity: 0.7; margin-bottom: 3px; }
+    .contact-info-item .value { font-weight: 800; }
+    .trial-badge { display: inline-block; background: #f39c12; color: white; font-size: 0.85rem; font-weight: 800; padding: 8px 24px; border-radius: 20px; margin-bottom: 20px; }
+  </style>
+</head>
+<body>
+
+<!-- ========== P1: 表紙 ========== -->
+<div class="page cover">
+  <div class="cover-logo">シャロ<span>AI</span></div>
+  <div class="cover-tagline">社会保険労務士事務所向け LINE AIアシスタント</div>
+  <div class="cover-title">サービス紹介資料</div>
+  <div class="cover-badges">
+    <div class="cover-badge">🎁 初月完全無料</div>
+    <div class="cover-badge">⚡ 最短即日導入</div>
+    <div class="cover-badge">🔒 設定はおまかせ</div>
+    <div class="cover-badge">📱 LINE対応</div>
+  </div>
+  <div class="cover-footer">合同会社エスコネクト｜info@lp.sconnect.co.jp｜https://lp.sconnect.co.jp</div>
+</div>
+
+<!-- ========== P2: 課題 ========== -->
+<div class="page">
+  <div class="page-header">
+    <h2>先生の事務所、こんなお悩みはありませんか？</h2>
+    <div class="page-num">1</div>
+  </div>
+
+  <div class="problem-grid">
+    <div class="problem-card">
+      <div class="icon">📞</div>
+      <h4>同じ質問への繰り返し対応</h4>
+      <p>「有給は何日ですか？」「社会保険の加入条件は？」など、同じ質問に毎日何度も答えている。</p>
+    </div>
+    <div class="problem-card">
+      <div class="icon">🌙</div>
+      <h4>営業時間外の問い合わせ</h4>
+      <p>夜間・休日にも顧客から連絡が来る。翌朝まで対応できず、顧客満足度が下がることも。</p>
+    </div>
+    <div class="problem-card">
+      <div class="icon">👥</div>
+      <h4>少人数での対応限界</h4>
+      <p>スタッフを増やしたいが採用難。少人数で多くの顧客に対応しなければならない。</p>
+    </div>
+    <div class="problem-card">
+      <div class="icon">🏆</div>
+      <h4>他事務所との差別化</h4>
+      <p>価格競争に巻き込まれている。顧客に選ばれる独自のサービスや価値を提供できていない。</p>
+    </div>
+  </div>
+
+  <div class="solution-box">
+    <h3>これらをまとめて解決するのが <span>シャロAI</span> です</h3>
+    <p>LINEを使ったAI自動対応で、先生が繰り返し対応していた定型質問をAIが代わりに受け付け、本来の業務に集中できる時間が増えます。</p>
+  </div>
+</div>
+
+<!-- ========== P3: 機能 ========== -->
+<div class="page">
+  <div class="page-header">
+    <h2>シャロAIでできること</h2>
+    <div class="page-num">2</div>
+  </div>
+
+  <div class="feature-list">
+    <div class="feature-item">
+      <div class="feature-icon">🤖</div>
+      <div>
+        <h4>LINE上でAIが24時間自動対応 <span class="feature-badge">コア機能</span></h4>
+        <p>顧客がLINEで質問すると、AIが即座に回答します。夜間・休日でも対応可能。「有給の日数」「社会保険の加入条件」などよくある質問に自動で答えます。</p>
+      </div>
+    </div>
+    <div class="feature-item">
+      <div class="feature-icon">⚙️</div>
+      <div>
+        <h4>事務所ごとに完全カスタマイズ可能</h4>
+        <p>FAQ・案内内容・事務所名・対応範囲など、すべて事務所のスタイルに合わせて設定できます。「うちだけのAI」として活用いただけます。</p>
+      </div>
+    </div>
+    <div class="feature-item">
+      <div class="feature-icon">📊</div>
+      <div>
+        <h4>管理画面で会話ログ・問い合わせを一元管理</h4>
+        <p>どんな質問が来ているかをリアルタイムで確認できます。AIが対応できなかった質問はアラートで通知。顧客ニーズの把握にも活用できます。</p>
+      </div>
+    </div>
+    <div class="feature-item">
+      <div class="feature-icon">🔒</div>
+      <div>
+        <h4>データは事務所ごとに完全分離</h4>
+        <p>他の事務所のデータと混在することは一切ありません。顧客情報のセキュリティを厳守します。</p>
+      </div>
+    </div>
+    <div class="feature-item">
+      <div class="feature-icon">🚀</div>
+      <div>
+        <h4>導入・設定はすべておまかせ <span class="feature-badge">安心</span></h4>
+        <p>LINE公式アカウントの開設から初期設定まで、エスコネクトのスタッフが全対応します。IT知識は一切不要です。</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ========== P4: 料金 ========== -->
+<div class="page">
+  <div class="page-header">
+    <h2>料金プラン</h2>
+    <div class="page-num">3</div>
+  </div>
+
+  <div class="pricing-grid">
+    <div class="plan">
+      <div class="plan-free-badge">🎁 初月無料</div>
+      <div class="plan-name">ライトプラン</div>
+      <div class="plan-price">¥5,000<span>/月（税込）</span></div>
+      <ul class="plan-features">
+        <li>LINEでのAI自動対応</li>
+        <li>6カテゴリのリッチメニュー</li>
+        <li>管理画面（基本設定）</li>
+        <li>会話ログ閲覧</li>
+        <li>FAQ登録（上限5件）</li>
+      </ul>
+    </div>
+    <div class="plan popular">
+      <div class="plan-popular-badge">🔥 最も人気</div>
+      <div class="plan-free-badge" style="margin-top:12px;">🎁 初月無料</div>
+      <div class="plan-name">スタンダードプラン</div>
+      <div class="plan-price">¥10,000<span>/月（税込）</span></div>
+      <ul class="plan-features">
+        <li>LINEでのAI自動対応</li>
+        <li>6カテゴリのリッチメニュー</li>
+        <li>管理画面（全機能）</li>
+        <li>会話ログ閲覧</li>
+        <li>FAQ登録（無制限）</li>
+      </ul>
+    </div>
+    <div class="plan">
+      <div class="plan-free-badge">🎁 初月無料</div>
+      <div class="plan-name">プレミアムプラン</div>
+      <div class="plan-price">¥20,000<span>/月（税込）</span></div>
+      <ul class="plan-features">
+        <li>LINEでのAI自動対応</li>
+        <li>6カテゴリのリッチメニュー</li>
+        <li>管理画面（全機能）</li>
+        <li>会話ログ閲覧</li>
+        <li>FAQ登録（無制限）</li>
+        <li>専任カスタムサポート</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="pricing-note">
+    ※ 初期費用は一切かかりません。初月は完全無料でお試しいただけます。契約期間の縛りはなく、いつでも解約可能です。
+  </div>
+
+  <div style="margin-top:20px;">
+    <div class="page-header" style="margin-bottom:16px;">
+      <h2 style="font-size:1.1rem;">導入までの流れ</h2>
+    </div>
+    <div class="flow-steps">
+      <div class="flow-step">
+        <div class="step-num">1</div>
+        <div class="step-content">
+          <h4>お問い合わせ・ご相談 <span class="step-duration">当日〜翌営業日</span></h4>
+          <p>メールまたはWebフォームからご連絡ください。担当者よりご返信いたします。</p>
+        </div>
+      </div>
+      <div class="flow-step">
+        <div class="step-num">2</div>
+        <div class="step-content">
+          <h4>初期設定・カスタマイズ <span class="step-duration">2〜3日</span></h4>
+          <p>事務所の情報・FAQ・対応内容をヒアリングし、こちらで設定します。先生の作業は不要です。</p>
+        </div>
+      </div>
+      <div class="flow-step">
+        <div class="step-num">3</div>
+        <div class="step-content">
+          <h4>LINE公式アカウント連携 <span class="step-duration">即日</span></h4>
+          <p>既存のLINE公式アカウントに接続します。アカウントをお持ちでない場合は開設をサポートします。</p>
+        </div>
+      </div>
+      <div class="flow-step">
+        <div class="step-num">4</div>
+        <div class="step-content">
+          <h4>運用開始 🎉</h4>
+          <p>最短で申し込み翌日から稼働できます。運用後のサポートも継続して対応します。</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ========== P5: FAQ + CTA ========== -->
+<div class="page">
+  <div class="page-header">
+    <h2>よくあるご質問</h2>
+    <div class="page-num">4</div>
+  </div>
+
+  <div class="faq-list" style="margin-bottom:24px;">
+    <div class="faq-item">
+      <div class="faq-q">LINEを使っていない顧客でも対応できますか？</div>
+      <div class="faq-a">LINEをご利用の顧客様向けのサービスです。LINE利用率は国内8,900万人以上（2024年）と非常に高く、顧問先様のほとんどがLINEをお持ちです。</div>
+    </div>
+    <div class="faq-item">
+      <div class="faq-q">AIが誤った回答をして問題になりませんか？</div>
+      <div class="faq-a">シャロAIは「一般的な制度の説明・案内」に特化しており、個別の法的判断は行いません。複雑な内容は「担当者に確認します」と案内する設定にすることも可能です。</div>
+    </div>
+    <div class="faq-item">
+      <div class="faq-q">AIが社労士法上の「有償の法律事務」に該当しませんか？</div>
+      <div class="faq-a">シャロAIは制度の一般的な説明・案内に特化しており、個別事案への法的アドバイスは行いません。先生の補助ツールとしての位置づけです。</div>
+    </div>
+    <div class="faq-item">
+      <div class="faq-q">解約はいつでもできますか？</div>
+      <div class="faq-a">はい、契約期間の縛りは一切ありません。月単位でのご利用が可能で、いつでもご解約いただけます。</div>
+    </div>
+    <div class="faq-item">
+      <div class="faq-q">他の事務所のデータと混在しませんか？</div>
+      <div class="faq-a">データは事務所ごとに完全に分離して管理しています。他の事務所の情報が混入することは一切ありません。</div>
+    </div>
+  </div>
+
+  <div class="contact-box">
+    <div class="trial-badge">🎁 初月完全無料でお試しいただけます</div>
+    <h3>まずはお気軽にご相談ください</h3>
+    <p>設定・導入はすべてこちらで対応します。ご返信は通常1営業日以内。</p>
+    <div class="contact-info">
+      <div class="contact-info-item">
+        <div class="label">メール</div>
+        <div class="value">info@lp.sconnect.co.jp</div>
+      </div>
+      <div class="contact-info-item">
+        <div class="label">Web</div>
+        <div class="value">https://lp.sconnect.co.jp</div>
+      </div>
+      <div class="contact-info-item">
+        <div class="label">提供元</div>
+        <div class="value">合同会社エスコネクト</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>
