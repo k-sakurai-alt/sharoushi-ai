@@ -363,7 +363,7 @@ router.post('/sales/send-all', async (req, res) => {
   const results = [];
   for (const item of emails) {
     try {
-      const subject = item.subject || '社労士事務所様向けLINE AIサービス「シャロAI」のご紹介';
+      const subject = item.subject || '先生の事務所に24時間対応できるAIを、初月無料で';
       const message = [
         `From: =?UTF-8?B?${Buffer.from('桜井 謙司（合同会社エスコネクト）').toString('base64')}?= <${senderEmail}>`,
         `To: ${item.to}`,
