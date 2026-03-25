@@ -363,7 +363,7 @@ router.post('/sales/send-all', async (req, res) => {
   const results = [];
   for (const item of emails) {
     try {
-      const subject = item.subject || '先生の事務所に24時間対応できるAIを、初月無料で';
+      const subject = item.subject || '社労士事務所のLINE・電話対応をAIに任せる方法';
       const message = [
         `From: =?UTF-8?B?${Buffer.from('桜井 謙司（合同会社エスコネクト）').toString('base64')}?= <${senderEmail}>`,
         `To: ${item.to}`,
@@ -381,7 +381,7 @@ router.post('/sales/send-all', async (req, res) => {
       // ステータスを送信済みに更新
       if (item.id) await db.updateOutreachStatus(item.id, 'sent', item.notes || '');
       results.push({ to: item.to, success: true });
-      await new Promise(r => setTimeout(r, 3000)); // 送信間隔3秒（迷惑メール対策）
+      await new Promise(r => setTimeout(r, 12000)); // 送信間隔12秒（迷惑メール対策）
     } catch (e) {
       results.push({ to: item.to, success: false, error: e.message });
     }
@@ -471,6 +471,33 @@ router.get('/sales/leads-preview', requireAuth, async (req, res) => {
     return { office, email, phone: row.phone || '', isDuplicate };
   });
   res.json({ total: preview.length, newCount: preview.filter(r => !r.isDuplicate).length, records: preview.slice(0, 50) });
+});
+
+// 兵庫県社労士会スクレイピング結果（hyogo_sr_leads.csv）をインポート
+router.post('/sales/import-hyogo-sr', requireAuth, async (req, res) => {
+  const fs = require('fs');
+  const path = require('path');
+  const csvPath = path.join(__dirname, '../scripts/hyogo_sr_leads.csv');
+  if (!fs.existsSync(csvPath)) return res.redirect('/admin/sales?error=no_file');
+  try {
+    const content = fs.readFileSync(csvPath, 'utf-8').replace(/^\uFEFF/, '');
+    const records = parse(content, { columns: true, skip_empty_lines: true, trim: true });
+    let added = 0, skipped = 0;
+    const existing = await db.getOutreach();
+    const existingOffices = new Set(existing.map(r => r.office));
+    for (const row of records) {
+      const office = (row.office || '').trim();
+      if (!office) { skipped++; continue; }
+      if (existingOffices.has(office)) { skipped++; continue; }
+      await db.addOutreach(office, '', null, row.notes || '');
+      existingOffices.add(office);
+      added++;
+    }
+    res.redirect(`/admin/sales?import_added=${added}&import_skipped=${skipped}`);
+  } catch (e) {
+    console.error('import-hyogo-sr error:', e);
+    res.redirect('/admin/sales?error=import_failed');
+  }
 });
 
 // サーバー上のCSVをそのままインポート
