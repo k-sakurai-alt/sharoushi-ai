@@ -145,6 +145,38 @@
       <div class="progress-bar"><div class="progress-fill" style="width:<%= pct %>%"></div></div>
     </div>
 
+    <!-- 兵庫県社労士会スクレイピング＆インポートパネル -->
+    <div style="background:white;border-radius:16px;padding:20px 24px;box-shadow:0 2px 12px rgba(0,0,0,0.06);border-left:4px solid #27ae60;margin-bottom:16px;">
+      <div style="font-size:1rem;font-weight:800;color:#1a3a5c;margin-bottom:4px;">📋 兵庫県社労士会 リスト収集（1,350件）</div>
+      <div style="font-size:0.82rem;color:#7f8c8d;margin-bottom:14px;">事前に <code style="background:#f4f6f8;padding:2px 6px;border-radius:4px;">node scripts/local_launcher.js</code> をターミナルで起動しておいてください。</div>
+      <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;">
+        <button onclick="startScraping()" style="background:#27ae60;color:white;padding:10px 22px;border:none;border-radius:10px;font-weight:700;font-size:0.9rem;cursor:pointer;">
+          🔍 ① スクレイピング実行（約34分）
+        </button>
+        <span style="color:#bdc3c7;font-size:1.2rem;">→</span>
+        <form action="/admin/sales/import-hyogo-sr" method="POST" style="margin:0;" onsubmit="return confirm('hyogo_sr_leads.csvを営業リストにインポートします。重複は自動スキップされます。よろしいですか？')">
+          <button type="submit" style="background:#1a3a5c;color:white;padding:10px 22px;border:none;border-radius:10px;font-weight:700;font-size:0.9rem;cursor:pointer;">
+            📥 ② インポート
+          </button>
+        </form>
+      </div>
+      <div id="scrape-status" style="margin-top:12px;display:none;padding:10px 14px;border-radius:8px;font-size:0.85rem;"></div>
+    </div>
+
+    <!-- フォーム営業パネル -->
+    <div style="background:white;border-radius:16px;padding:20px 24px;box-shadow:0 2px 12px rgba(0,0,0,0.06);border-left:4px solid #e67e22;margin-bottom:16px;">
+      <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;">
+        <div>
+          <div style="font-size:1rem;font-weight:800;color:#1a3a5c;margin-bottom:4px;">🌐 フォーム営業（半自動送信）</div>
+          <div style="font-size:0.82rem;color:#7f8c8d;">HPあり・メアドなしの事務所にお問い合わせフォームを自動入力して送信できます。<br>事前に <code style="background:#f4f6f8;padding:2px 6px;border-radius:4px;">node scripts/local_launcher.js</code> をターミナルで起動しておいてください。</div>
+        </div>
+        <button onclick="startFormSender()" style="background:#e67e22;color:white;padding:11px 24px;border:none;border-radius:10px;font-weight:700;font-size:0.9rem;cursor:pointer;white-space:nowrap;">
+          🚀 フォーム営業開始
+        </button>
+      </div>
+      <div id="form-sender-status" style="margin-top:12px;display:none;padding:10px 14px;border-radius:8px;font-size:0.85rem;"></div>
+    </div>
+
     <!-- フォローアップ通知 -->
     <% if (locals.query && locals.query.followup_none) { %>
       <div style="background:#fef9e7;border-radius:10px;padding:12px 18px;margin-bottom:16px;color:#f39c12;font-weight:700;">
@@ -490,6 +522,58 @@
         content.innerHTML = '<p style="color:#e74c3c">読み込みに失敗しました</p>';
       }
     }
+  async function startScraping() {
+    const status = document.getElementById('scrape-status');
+    status.style.display = 'block';
+    status.style.background = '#fef9e7';
+    status.style.color = '#f39c12';
+    status.innerHTML = '⏳ ローカルランチャーに接続中...';
+    try {
+      const res = await fetch('http://localhost:3003/scrape', {
+        method: 'POST',
+        signal: AbortSignal.timeout(5000),
+      });
+      const data = await res.json();
+      if (data.success) {
+        status.style.background = '#e8f8f5';
+        status.style.color = '#27ae60';
+        status.innerHTML = '✅ Terminalでスクレイピングを起動しました。約34分後に②インポートを押してください。';
+      } else {
+        throw new Error(data.error || '不明なエラー');
+      }
+    } catch(e) {
+      status.style.background = '#fdedec';
+      status.style.color = '#e74c3c';
+      status.innerHTML = '❌ ローカルランチャーに接続できません。ターミナルで以下を実行してください：<br><code style="background:#f4f6f8;padding:2px 8px;border-radius:4px;">node scripts/local_launcher.js</code>';
+    }
+  }
+
+  async function startFormSender() {
+    const status = document.getElementById('form-sender-status');
+    status.style.display = 'block';
+    status.style.background = '#fef9e7';
+    status.style.color = '#f39c12';
+    status.innerHTML = '⏳ ローカルランチャーに接続中...';
+
+    try {
+      const res = await fetch('http://localhost:3003/start', {
+        method: 'POST',
+        signal: AbortSignal.timeout(5000),
+      });
+      const data = await res.json();
+      if (data.success) {
+        status.style.background = '#e8f8f5';
+        status.style.color = '#27ae60';
+        status.innerHTML = '✅ Terminalでform_senderを起動しました。ターミナルの指示に従って送信してください。';
+      } else {
+        throw new Error(data.error || '不明なエラー');
+      }
+    } catch(e) {
+      status.style.background = '#fdedec';
+      status.style.color = '#e74c3c';
+      status.innerHTML = '❌ ローカルランチャーに接続できません。ターミナルで以下を実行してください：<br><code style="background:#f4f6f8;padding:2px 8px;border-radius:4px;">node scripts/local_launcher.js</code>';
+    }
+  }
   </script>
 </body>
 </html>
